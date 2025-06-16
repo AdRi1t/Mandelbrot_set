@@ -6,7 +6,7 @@
 #include <iostream>
 #include <thread>
 
-void handle_event(sf::Window* const window) {
+void handle_event(sf::RenderWindow* const window) {
   sf::Event event;
   window->setActive(false);
 
@@ -31,10 +31,10 @@ void handle_event(sf::Window* const window) {
       if (event.key.code == sf::Keyboard::Down) {
         GlobalConfig::move_center(0, -moveSpeed);
       }
-      if (event.type == sf::Event::MouseWheelScrolled) {
-        if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
-          GlobalConfig::change_zoom(event.mouseWheelScroll.delta);
-        }
+    }
+    if (event.type == sf::Event::MouseWheelScrolled) {
+      if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+        GlobalConfig::change_zoom(event.mouseWheelScroll.delta);
       }
     }
   }

@@ -8,7 +8,7 @@ std::mutex config_mutex;
 
 void parse_from_argv(int argc, char* argv[]) {
   std::lock_guard<std::mutex> lock(config_mutex);
-  config_data.iter_max   = 250;
+  config_data.iter_max   = 400;
   config_data.zoom_level = 1.0;
   config_data.center_x   = 0.0;
   config_data.center_y   = 0.0;
