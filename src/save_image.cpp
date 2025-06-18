@@ -9,7 +9,7 @@
 #include "window_dim.hpp"
 #include "save_image.h"
 
-inline std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(int n, uint32_t iter_max) {
+inline std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n, uint32_t iter_max) {
   int N  = 256;  // colors per element
   int N3 = N * N * N;
   // map n on the 0..1 interval (real numbers)
@@ -24,7 +24,7 @@ inline std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(int n, uin
   return std::make_tuple(r, g, b);
 }
 
-inline std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_smooth(int n, uint32_t iter_max) {
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_smooth(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -50,7 +50,7 @@ std::string now_to_string() {
   return sstring.str();
 }
 
-void plot(WindowDim<uint32_t> &scr, int *colors, uint32_t iter_max, const char *fname,
+void plot(WindowDim<uint32_t> &scr, uint32_t *colors, uint32_t iter_max, const char *fname,
           bool smooth_color) {
 // active only for static linking
 #ifdef FREEIMAGE_LIB
@@ -62,12 +62,12 @@ void plot(WindowDim<uint32_t> &scr, int *colors, uint32_t iter_max, const char *
   FIBITMAP *bitmap = FreeImage_Allocate(width, height, 32);  // RGBA
 
   int k = 0;
-  std::tuple<int, int, int> rgb;
+  std::tuple<uint8_t, uint8_t, uint8_t> rgb;
 
   if (!smooth_color) {
     for (uint32_t i = scr.y_min(); i < scr.y_max(); ++i) {
       for (uint32_t j = scr.x_min(); j < scr.x_max(); ++j) {
-        int n = colors[k];
+        uint32_t n = colors[k];
 
         rgb = get_rgb_piecewise_linear(n, iter_max);
 

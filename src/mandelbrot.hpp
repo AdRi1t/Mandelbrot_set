@@ -2,4 +2,5 @@
 
 #include "window_dim.hpp"
 
-void mandelbrot(WindowDim<uint32_t> scr,  WindowDim<double> fract);
+void mandelbrot(WindowDim<uint32_t> screen, WindowDim<double> fract, uint32_t iter_max, uint32_t *escape_step);
+void mandelbrot(WindowDim<uint32_t> screen, WindowDim<double> fract, uint32_t *escape_step);
