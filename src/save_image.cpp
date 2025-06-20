@@ -9,7 +9,8 @@
 #include "window_dim.hpp"
 #include "save_image.h"
 
-inline std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n, uint32_t iter_max) {
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n,
+                                                               uint32_t iter_max) {
   int N  = 256;  // colors per element
   int N3 = N * N * N;
   // map n on the 0..1 interval (real numbers)
@@ -17,10 +18,10 @@ inline std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n
   // expand n on the 0 .. 256^3 interval (integers)
   n = (int)(t * (double)N3);
 
-  uint8_t b  = n / (N * N);
-  int nn = n - b * N * N;
-  uint8_t r  = nn / N;
-  uint8_t g  = nn - r * N;
+  uint8_t b = n / (N * N);
+  int nn    = n - b * N * N;
+  uint8_t r = nn / N;
+  uint8_t g = nn - r * N;
   return std::make_tuple(r, g, b);
 }
 
@@ -50,8 +51,8 @@ std::string now_to_string() {
   return sstring.str();
 }
 
-void plot(WindowDim<uint32_t> &scr, uint32_t *colors, uint32_t iter_max, const char *fname,
-          bool smooth_color) {
+void plot(WindowDim<uint32_t> &scr, uint32_t *colors, uint32_t iter_max,
+          const char *fname, bool smooth_color) {
 // active only for static linking
 #ifdef FREEIMAGE_LIB
   FreeImage_Initialise();

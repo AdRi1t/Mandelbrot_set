@@ -10,6 +10,18 @@ add_compile_options(-Wall -Wextra)
 option(ENABLE_SEQUENTIAL "Enable sequential CPU implementation" ON)
 option(ENABLE_OPENMP "Enable OpenMP acceleration" OFF)
 option(ENABLE_HIP "Enable HIP GPU acceleration" OFF)
+option(ENABLE_SANITIZERS "Enable Address and Memory Sanitizers" OFF)
+
+if(ENABLE_SANITIZERS)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message(STATUS "Enabling Address and Memory Sanitizers")
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+  else()
+    message(WARNING "Sanitizers requested but are only available with GCC and Clang")
+  endif()
+endif()
+
 
 if(ENABLE_OPENMP AND ENABLE_HIP) 
   message(FATAL_ERROR "HIP and OPENMP can't be enable together")
@@ -33,7 +45,6 @@ if(ENABLE_HIP)
         endif()
     endif()
 endif()
-
 
 # FREEIMAGE stuff
 find_library(FREEIMAGE_LIBRARY freeimage)

@@ -4,7 +4,6 @@
 #include "window_dim.hpp"
 #include "window_utils.h"
 
-
 #include <iostream>
 #include <thread>
 
@@ -14,8 +13,8 @@ void sfml_handle(WindowDim<unsigned int> window_size, WindowDim<double> fract) {
   settings.stencilBits       = 8;
   settings.antialiasingLevel = 4;
   sf::RenderWindow window(sf::VideoMode({window_size.width(), window_size.height()}),
-                    "Mandelbort", sf::Style::Default, settings);
-  
+                          "Mandelbort", sf::Style::Default, settings);
+
   window.setActive(false);
   std::thread rendering_thread(&render_handle, &window, &fract);
 

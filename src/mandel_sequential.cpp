@@ -18,9 +18,13 @@ concept FractalFunction = std::invocable<F, T, T> && requires(F f, T a, T b) {
 };
 
 // Convert a pixel coordinate to the complex domain
-Complex scale(WindowDim<uint32_t> &screen, WindowDim<double> &fr, Complex c) {
-  return Complex(c.real() / (double)screen.width() * fr.width() + fr.x_min(),
-                 c.imag() / (double)screen.height() * fr.height() + fr.y_min());
+Complex scale(const WindowDim<uint32_t> &screen, const WindowDim<double> &fr,
+              Complex c) noexcept {
+  // Avoid repeated calculations by storing width and height ratios
+  const double x_ratio = fr.width() / static_cast<double>(screen.width());
+  const double y_ratio = fr.height() / static_cast<double>(screen.height());
+
+  return Complex(c.real() * x_ratio + fr.x_min(), c.imag() * y_ratio + fr.y_min());
 }
 
 // Check if a point is in the set or escapes to infinity, return the number if iterations
@@ -40,7 +44,7 @@ uint32_t escape(Complex c, uint32_t iter_max, Fractal_t func) {
 // Loop over each pixel from our image and check if the points associated with this pixel
 // escape to infinity
 template <FractalFunction Fractal_t>
-void get_number_iterations(WindowDim<uint32_t> &screen, WindowDim<double> &fract,
+void get_number_iterations(const WindowDim<uint32_t> &screen, const WindowDim<double> &fract,
                            uint32_t iter_max, uint32_t *colors, Fractal_t func) {
   int k = 0;
   // iterate through pixel
@@ -55,12 +59,12 @@ void get_number_iterations(WindowDim<uint32_t> &screen, WindowDim<double> &fract
 }
 
 template <FractalFunction Fractal_t>
-void fractal(WindowDim<uint32_t> &screen, WindowDim<double> &fract, uint32_t iter_max,
+void fractal(const WindowDim<uint32_t> &screen, const WindowDim<double> &fract, uint32_t iter_max,
              uint32_t *colors, Fractal_t func, const char *fname, bool smooth_color) {
   auto start = std::chrono::steady_clock::now();
   get_number_iterations(screen, fract, iter_max, colors, func);
   auto end = std::chrono::steady_clock::now();
-  std::cout << "Time to generate " << fname << " = "
+  std::cout << "Time to escape map " << " = "
             << std::chrono::duration<double, std::milli>(end - start).count() << " [ms]"
             << std::endl;
 
@@ -68,7 +72,8 @@ void fractal(WindowDim<uint32_t> &screen, WindowDim<double> &fract, uint32_t ite
   // plot(screen, colors, iter_max, fname, smooth_color);
 }
 
-void mandelbrot(WindowDim<uint32_t> screen, WindowDim<double> fract, uint32_t *escape_step) {
+void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
+                uint32_t *escape_step) {
   // The function used to calculate the fractal
   constexpr auto func = [](const Complex z, const Complex c) noexcept -> Complex {
     return z * z + c;

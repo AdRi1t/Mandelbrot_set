@@ -1,7 +1,10 @@
 Language: Cpp
+PointerAlignment: Left
+ReferenceAlignment: Left
 BasedOnStyle: Google
 SortIncludes: false
 ColumnLimit: 90
 AlignConsecutiveAssignments: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: true
+
