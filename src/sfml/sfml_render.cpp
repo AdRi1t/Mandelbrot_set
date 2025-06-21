@@ -1,11 +1,12 @@
 #include "sfml_mandelbrot.hpp"
-#include "window_utils.h"
-#include "global_config.hpp"
-#include "mandelbrot.hpp"
-#include "save_image.h"
 
 #include <iostream>
 #include <thread>
+
+#include "core/window_utils.hpp"
+#include "core/global_config.hpp"
+#include "fractal/mandelbrot.hpp"
+#include "save_image.hpp"
 
 void updateTextureFromColorArray(sf::Texture &texture, const sf::Color *colorArray) {
   texture.update(reinterpret_cast<const sf::Uint8 *>(colorArray));
@@ -60,13 +61,12 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
   sf::Texture fractal_texture;
 
   while (renderWindow->isOpen()) {
-    auto [x, y] = GlobalConfig::get_center();
-    auto zoom   = GlobalConfig::get_zoom_level();
+    std::tie(center_x, center_y) = GlobalConfig::get_center();
+    auto zoom                    = GlobalConfig::get_zoom_level();
     renderWindow->clear(sf::Color::Black);
 
-    sf::Vector2u current_dim = renderWindow->getSize();
-    if (current_dim.x != dim.x || current_dim.y != dim.y) {
-      dim    = current_dim;
+    if (GlobalConfig::is_window_resized()) {
+      dim    = renderWindow->getSize();
       screen = WindowDim<uint32_t>(0, dim.x, 0, dim.y);
 
       delete[] escape_step;
@@ -76,25 +76,30 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
 
       WindowUtils::adjust_ratio(&screen, fract);
       GlobalConfig::set_fractDim(fract->width(), fract->height());
+      GlobalConfig::set_window_resized(false);
     }
 
-    WindowUtils::zoom(x, y, zoom, fract);
     GlobalConfig::set_fractDim(fract->width(), fract->height());
+    WindowUtils::zoom(center_x, center_y, zoom, fract);
 
-    mandelbrot(screen, *fract, escape_step);
+    auto fractal_start = std::chrono::steady_clock::now();
+    mandelbrot(screen, *fract, escape_step, GlobalConfig::get_iter_max());
 
-    auto start = std::chrono::steady_clock::now();
+    LogInfo::set_fractal_time(std::chrono::duration<float, std::milli>(
+                                  std::chrono::steady_clock::now() - fractal_start)
+                                  .count());
+
+    auto display_start = std::chrono::steady_clock::now();
     plot(screen, escape_step, GlobalConfig::get_iter_max(), fractal_sprite,
          fractal_texture, pixelArray);
-    auto end = std::chrono::steady_clock::now();
-    /*
-     std::cout << "Time to sprite " << " = "
-               << std::chrono::duration<double, std::milli>(end - start).count() << "
-     [ms]"
-               << std::endl;
- */
+
+    LogInfo::set_display_time_ms(std::chrono::duration<float, std::milli>(
+                                     std::chrono::steady_clock::now() - display_start)
+                                     .count());
+
     renderWindow->draw(fractal_sprite);
     renderWindow->display();
+    LogInfo::printLog();
   }
 
   delete[] escape_step;

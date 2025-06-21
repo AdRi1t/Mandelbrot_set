@@ -13,6 +13,7 @@ struct ConfigData {
   double center_y;
   double fract_width;
   double fract_height;
+  bool window_resized;
 };
 
 extern ConfigData _config_data;
@@ -22,10 +23,12 @@ extern std::mutex _config_mutex;
 void parse_from_argv(int argc, char* argv[]);
 void change_iter_max(int delta_iter_max);
 void change_zoom(double change_factor);
+void move_center(double x, double y);
 void set_fractDim(double fract_width, double fract_height);
+void set_window_resized(bool resized);
 uint32_t get_iter_max();
 double get_zoom_level();
-void move_center(double x, double y);
+bool is_window_resized();
 std::pair<double, double> get_center();
 std::pair<double, double> get_fractDim();
 void print_configuration();
@@ -36,10 +39,10 @@ namespace LogInfo {
 
 namespace {
 struct LogData {
-  double fractal_time_ms;
-  double display_time_ms;
+  float fractal_time_ms;
+  float display_time_ms;
   double zoom;
-  double fps;
+  float fps;
 };
 
 extern LogData _log_data;

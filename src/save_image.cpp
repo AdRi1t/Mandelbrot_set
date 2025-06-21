@@ -1,13 +1,15 @@
+#include "save_image.hpp"
+
+#include <ctime>
 #include <tuple>
 #include <iostream>
-#include <ctime>
 #include <iomanip>
 #include <string>
 #include <sstream>
+
 #include <FreeImage.h>
 
-#include "window_dim.hpp"
-#include "save_image.h"
+#include "core/window_dim.hpp"
 
 std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n,
                                                                uint32_t iter_max) {

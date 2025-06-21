@@ -1,3 +1,5 @@
+#ifdef USE_HIP
+
 #include <hip/hip_runtime.h>
 #include <hip/hip_runtime_api.h>
 
@@ -15,3 +17,5 @@ void get_number_iterations(window<int> &scr, window<double> &fract, int iter_max
   double                   = d_scr;
   hip_malloc(&d_scr, alloca_size);
 }
+
+#endif

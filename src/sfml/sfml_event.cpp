@@ -1,11 +1,12 @@
-#include "save_image.h"
 #include "sfml_mandelbrot.hpp"
-#include "window_utils.h"
-#include "global_config.hpp"
 
+#include <cstdint>
 #include <iostream>
 #include <thread>
-#include <cstdint>
+
+#include "save_image.hpp"
+#include "core/window_utils.hpp"
+#include "core/global_config.hpp"
 
 void handle_event(sf::RenderWindow* const window) {
   sf::Event event;
@@ -49,8 +50,7 @@ void handle_event(sf::RenderWindow* const window) {
       }
 
       if (event.type == sf::Event::Resized) {
-        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-        window->setView(sf::View(visibleArea));
+        GlobalConfig::set_window_resized(true);
       }
 
       if (event.type == sf::Event::MouseWheelScrolled) {
@@ -68,8 +68,8 @@ void handle_event(sf::RenderWindow* const window) {
               static_cast<float>(frac_width) / static_cast<float>(windowSize.x),
               static_cast<float>(frac_height) / static_cast<float>(windowSize.y));
 
-          double delta_x = (mousePos.x - static_cast<float>(windowSize.x) / 2) * ratio.x;
-          double delta_y = (mousePos.y - static_cast<float>(windowSize.y) / 2) * ratio.y;
+          double delta_x = 0.5 * (mousePos.x - static_cast<float>(windowSize.x) / 2) * ratio.x;
+          double delta_y = 0.5 * (mousePos.y - static_cast<float>(windowSize.y) / 2) * ratio.y;
             
           GlobalConfig::move_center(delta_x, delta_y);
         }

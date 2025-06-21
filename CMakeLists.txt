@@ -5,13 +5,12 @@ project(mandelbrot VERSION 1.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-Wall -Wextra)
-
 option(ENABLE_SEQUENTIAL "Enable sequential CPU implementation" ON)
 option(ENABLE_OPENMP "Enable OpenMP acceleration" OFF)
 option(ENABLE_HIP "Enable HIP GPU acceleration" OFF)
 option(ENABLE_SANITIZERS "Enable Address and Memory Sanitizers" OFF)
 
+# Try sanitizers
 if(ENABLE_SANITIZERS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     message(STATUS "Enabling Address and Memory Sanitizers")
@@ -22,8 +21,7 @@ if(ENABLE_SANITIZERS)
   endif()
 endif()
 
-
-if(ENABLE_OPENMP AND ENABLE_HIP) 
+if(ENABLE_OPENMP AND ENABLE_HIP)
   message(FATAL_ERROR "HIP and OPENMP can't be enable together")
 endif()
 
@@ -56,18 +54,26 @@ message(STATUS "Found FreeImage headers: ${FREEIMAGE_INCLUDE_DIR}")
 find_package(SFML 2 REQUIRED COMPONENTS graphics window system)
 
 set(MANDELBROT_SRC
-  src/global_config.cpp
+  src/core/global_config.cpp
+  src/core/window_utils.cpp
+  src/sfml/sfml_event.cpp
+  src/sfml/sfml_render.cpp
   src/save_image.cpp
-  src/window_utils.cpp
-  src/mandel_sequential.cpp
   src/sfml_main.cpp
-  src/sfml_render.cpp
-  src/sfml_event.cpp
 )
+
+if(ENABLE_HIP)
+  list(APPEND MANDELBROT_SRC src/fractal/mandel_hip.cpp)
+else()
+  list(APPEND MANDELBROT_SRC src/fractal/mandel_sequential.cpp)
+endif()
+
+add_compile_options(-Wall -Wextra)
 
 add_executable(mandelbrot ${MANDELBROT_SRC})
 target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} sfml-graphics sfml-window sfml-system)
 
-# needed ?
-target_include_directories(mandelbrot PUBLIC ${FREEIMAGE_INCLUDE_DIR})
+target_include_directories(mandelbrot PUBLIC
+                          ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 

@@ -1,8 +1,8 @@
-#ifndef UTILS__H
-#define UTILS__H
+#pragma once
+
+#include <cstdint>
 
 #include "window_dim.hpp"
-#include <cstdint>
 
 namespace WindowUtils {
 
@@ -20,4 +20,3 @@ void move(const double dx, const double dy, WindowDim<double> *fract);
 void adjust_ratio(const WindowDim<uint32_t> *screen, WindowDim<double> *fract);
 
 }  // namespace WindowUtils
-#endif

@@ -1,13 +1,9 @@
-#include <iostream>
-#include <complex>
-#include <vector>
-#include <chrono>
-#include <functional>
+#include "fractal/mandelbrot.hpp"
 
-#include "mandelbrot.hpp"
-#include "global_config.hpp"
-#include "save_image.h"
-#include "window_utils.h"
+#include <complex>
+
+#include "core/global_config.hpp"
+#include "core/window_utils.hpp"
 
 // Use an alias to simplify the use of complex type
 using Complex = std::complex<double>;
@@ -44,8 +40,9 @@ uint32_t escape(Complex c, uint32_t iter_max, Fractal_t func) {
 // Loop over each pixel from our image and check if the points associated with this pixel
 // escape to infinity
 template <FractalFunction Fractal_t>
-void get_number_iterations(const WindowDim<uint32_t> &screen, const WindowDim<double> &fract,
-                           uint32_t iter_max, uint32_t *colors, Fractal_t func) {
+void get_number_iterations(const WindowDim<uint32_t> &screen,
+                           const WindowDim<double> &fract, uint32_t iter_max,
+                           uint32_t *colors, Fractal_t func) {
   int k = 0;
   // iterate through pixel
   for (uint32_t i = screen.y_min(); i < screen.y_max(); ++i) {
@@ -59,34 +56,24 @@ void get_number_iterations(const WindowDim<uint32_t> &screen, const WindowDim<do
 }
 
 template <FractalFunction Fractal_t>
-void fractal(const WindowDim<uint32_t> &screen, const WindowDim<double> &fract, uint32_t iter_max,
-             uint32_t *colors, Fractal_t func, const char *fname, bool smooth_color) {
-  auto start = std::chrono::steady_clock::now();
+void fractal(const WindowDim<uint32_t> &screen, const WindowDim<double> &fract,
+             uint32_t iter_max, uint32_t *colors, Fractal_t func, bool smooth_color) {
   get_number_iterations(screen, fract, iter_max, colors, func);
-  auto end = std::chrono::steady_clock::now();
-  std::cout << "Time to escape map " << " = "
-            << std::chrono::duration<double, std::milli>(end - start).count() << " [ms]"
-            << std::endl;
-
-  // Save (show) the result as an image
-  // plot(screen, colors, iter_max, fname, smooth_color);
 }
 
 void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
-                uint32_t *escape_step) {
+                uint32_t *escape_step, uint32_t iter_max) {
   // The function used to calculate the fractal
   constexpr auto func = [](const Complex z, const Complex c) noexcept -> Complex {
     return z * z + c;
   };
 
-  uint32_t iter_max = GlobalConfig::get_iter_max();
-  std::string fname = now_to_string() + "_mandelbrot.png";
   bool smooth_color = true;
 
   // Experimental zoom (bugs ?). This will modify the fract window (the domain in which we
   // calculate the fractal function)
   // zoom(-1.28, -1.23, 0.01, 0.08, fract);  // Z2
 
-  fractal(screen, fract, iter_max, escape_step, func, fname.c_str(), smooth_color);
+  fractal(screen, fract, iter_max, escape_step, func, smooth_color);
   return;
 }

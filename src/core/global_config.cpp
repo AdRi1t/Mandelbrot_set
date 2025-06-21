@@ -2,16 +2,19 @@
 
 namespace GlobalConfig {
 namespace {
-ConfigData _config_data;
+ConfigData _config_data{.iter_max       = 400,
+                        .zoom_level     = 1.0,
+                        .center_x       = 0.0,
+                        .center_y       = 0.0,
+                        .fract_width    = 0.0,
+                        .fract_height   = 0.0,
+                        .window_resized = false};
 std::mutex _config_mutex;
 }  // namespace
 
 void parse_from_argv(int argc, char* argv[]) {
   std::lock_guard<std::mutex> lock(_config_mutex);
-  _config_data.iter_max   = 400;
-  _config_data.zoom_level = 1.0;
-  _config_data.center_x   = 0.0;
-  _config_data.center_y   = 0.0;
+
   for (int i = 1; i < argc; i++) {
     std::string_view arg(argv[i]);
     if (arg == "-h") {
@@ -51,6 +54,13 @@ void set_fractDim(double new_width, double new_height) {
   _config_data.fract_height = new_height;
 }
 
+void set_window_resized(bool resized) {
+  std::lock_guard<std::mutex> lock(_config_mutex);
+  _config_data.window_resized = resized;
+}
+
+bool is_window_resized() { return _config_data.window_resized; }
+
 std::pair<double, double> get_fractDim() {
   return std::make_pair(_config_data.fract_width, _config_data.fract_height);
 }
@@ -82,17 +92,19 @@ void print_configuration() {
 
 namespace LogInfo {
 namespace {
-LogData _log_data{0, 0, 1, 0};
+LogData _log_data{.fractal_time_ms = 0.0, .display_time_ms = 0.0, .fps = 0.0};
 std::mutex _log_mutex;
 }  // namespace
 
 void printLog() {
   std::lock_guard<std::mutex> lock(_log_mutex);
-  std::cout << "\033[2J\033[1;1H";
   std::cout << "Log Information:\n"
+            << "  Center:       ( " << GlobalConfig::get_center().first << ", "
+            << GlobalConfig::get_center().second << ")\n"
+            << "  Zoom level:     " << GlobalConfig::get_zoom_level() << "\n"
+            << "  Iterations max: " << GlobalConfig::get_iter_max() << "\n\n"
             << "  Fractal time: " << _log_data.fractal_time_ms << " ms\n"
             << "  Display time: " << _log_data.display_time_ms << " ms\n"
-            << "  Zoom level:   " << _log_data.zoom << "\n"
             << "  FPS:          " << _log_data.fps << "\n";
 
   if (!std::cout) {
