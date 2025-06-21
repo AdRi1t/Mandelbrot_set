@@ -122,9 +122,9 @@ void set_display_time_ms(double time_ms) {
   _log_data.display_time_ms = time_ms;
 }
 
-void set_zoom(double zoom_level) {
+void set_fps(double fps) {
   std::lock_guard<std::mutex> lock(_log_mutex);
-  _log_data.zoom = zoom_level;
+  _log_data.fps = fps;
 }
 
 }  // namespace LogInfo

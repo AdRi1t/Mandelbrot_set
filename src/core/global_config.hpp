@@ -41,7 +41,6 @@ namespace {
 struct LogData {
   float fractal_time_ms;
   float display_time_ms;
-  double zoom;
   float fps;
 };
 
@@ -52,6 +51,6 @@ extern std::mutex _log_mutex;
 void printLog();
 void set_fractal_time(double time_ms);
 void set_display_time_ms(double time_ms);
-void set_zoom(double time_ms);
+void set_fps(double time_ms);
 
 }  // namespace LogInfo

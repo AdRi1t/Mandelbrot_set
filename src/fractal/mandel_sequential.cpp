@@ -2,9 +2,6 @@
 
 #include <complex>
 
-#include "core/global_config.hpp"
-#include "core/window_utils.hpp"
-
 // Use an alias to simplify the use of complex type
 using Complex = std::complex<double>;
 
@@ -42,14 +39,14 @@ uint32_t escape(Complex c, uint32_t iter_max, Fractal_t func) {
 template <FractalFunction Fractal_t>
 void get_number_iterations(const WindowDim<uint32_t> &screen,
                            const WindowDim<double> &fract, uint32_t iter_max,
-                           uint32_t *colors, Fractal_t func) {
+                           uint32_t *escape_step, Fractal_t func) {
   int k = 0;
   // iterate through pixel
   for (uint32_t i = screen.y_min(); i < screen.y_max(); ++i) {
     for (uint32_t j = screen.x_min(); j < screen.x_max(); ++j) {
       Complex c((double)j, (double)i);
-      c         = scale(screen, fract, c);
-      colors[k] = escape(c, iter_max, func);
+      c              = scale(screen, fract, c);
+      escape_step[k] = escape(c, iter_max, func);
       k++;
     }
   }
@@ -57,8 +54,9 @@ void get_number_iterations(const WindowDim<uint32_t> &screen,
 
 template <FractalFunction Fractal_t>
 void fractal(const WindowDim<uint32_t> &screen, const WindowDim<double> &fract,
-             uint32_t iter_max, uint32_t *colors, Fractal_t func, bool smooth_color) {
-  get_number_iterations(screen, fract, iter_max, colors, func);
+             uint32_t iter_max, uint32_t *escape_step, Fractal_t func,
+             bool smooth_color) {
+  get_number_iterations(screen, fract, iter_max, escape_step, func);
 }
 
 void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,

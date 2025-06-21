@@ -55,10 +55,10 @@ void handle_event(sf::RenderWindow* const window) {
 
       if (event.type == sf::Event::MouseWheelScrolled) {
         if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
-          sf::Vector2u windowSize = window->getSize();
-            sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
-            sf::Vector2f mousePos(static_cast<float>(mousePosition.x),
-                      static_cast<float>(mousePosition.y));
+          sf::Vector2u windowSize    = window->getSize();
+          sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
+          sf::Vector2f mousePos(static_cast<float>(mousePosition.x),
+                                static_cast<float>(mousePosition.y));
 
           auto [frac_width, frac_height] = GlobalConfig::get_fractDim();
           float zoomFactor = event.mouseWheelScroll.delta > 0 ? 1.1 : 1 / 1.1;
@@ -68,9 +68,11 @@ void handle_event(sf::RenderWindow* const window) {
               static_cast<float>(frac_width) / static_cast<float>(windowSize.x),
               static_cast<float>(frac_height) / static_cast<float>(windowSize.y));
 
-          double delta_x = 0.5 * (mousePos.x - static_cast<float>(windowSize.x) / 2) * ratio.x;
-          double delta_y = 0.5 * (mousePos.y - static_cast<float>(windowSize.y) / 2) * ratio.y;
-            
+          double delta_x =
+              0.5 * (mousePos.x - static_cast<float>(windowSize.x) / 2) * ratio.x;
+          double delta_y =
+              0.5 * (mousePos.y - static_cast<float>(windowSize.y) / 2) * ratio.y;
+
           GlobalConfig::move_center(delta_x, delta_y);
         }
       }
