@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28.0)
 
-project(mandelbrot VERSION 1.1)
+project(mandelbrot LANGUAGES CXX VERSION 1.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,35 +10,34 @@ option(ENABLE_OPENMP "Enable OpenMP acceleration" OFF)
 option(ENABLE_HIP "Enable HIP GPU acceleration" OFF)
 option(ENABLE_SANITIZERS "Enable Address and Memory Sanitizers" OFF)
 
-# Try sanitizers
-if(ENABLE_SANITIZERS)
-  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    message(STATUS "Enabling Address and Memory Sanitizers")
-    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-    add_link_options(-fsanitize=address)
-  endif()
-endif()
-
 if(ENABLE_OPENMP AND ENABLE_HIP)
   message(FATAL_ERROR "HIP and OPENMP can't be enable together")
 endif()
 
 if(ENABLE_HIP)
   list(APPEND CMAKE_PREFIX_PATH "/opt/rocm/hip" "/opt/rocm")
+  find_package(HIP REQUIRED)
+  if(HIP_FOUND)
+    message(STATUS "Found HIP package")
+    set(CMAKE_CXX_COMPILER ${HIPCC})
+  endif()
   find_program(HIPCC hipcc)
   if(HIPCC)
     message(STATUS "Found hipcc: ${HIPCC}")
-    message(STATUS "HIP platform ${MAKE_HIP_PLATFORM}")
     set(CMAKE_CXX_COMPILER ${HIPCC})
-    add_compile_definitions(USE_HIP)
-  else()
-    find_package(HIP REQUIRED)
-    if(HIP_FOUND)
-      message(STATUS "Found HIP package")
-      message(STATUS "HIP platform ${MAKE_HIP_PLATFORM}")
-      set(CMAKE_CXX_COMPILER ${HIPCC})
-      add_compile_definitions(USE_HIP)
-    endif()
+  endif()
+endif()
+
+# Try sanitizers
+if(ENABLE_SANITIZERS)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT ENABLE_HIP)
+    message(STATUS "Enabling Address and Memory Sanitizers")
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+  endif()
+  if(ENABLE_HIP)
+    add_compile_options(-fgpu-sanitize -Rpass-analysis=loop-vectorize
+                        -Rpass-analysis=kernel-resource-usag -Rpass=loop-vectorize)
   endif()
 endif()
 
@@ -74,4 +73,14 @@ target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} sfml-graphics sfml
 target_include_directories(mandelbrot PUBLIC
                           ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+if(ENABLE_HIP)
+  message(STATUS "HIP platform ${CMAKE_HIP_PLATFORM}")
+  target_compile_definitions(mandelbrot PUBLIC USE_HIP)
+  target_include_directories(mandelbrot PUBLIC ${HIP_INCLUDE_DIRS})
+  target_link_libraries(mandelbrot PRIVATE ${HIP_LIBRARIES})
+endif()
+if(ENABLE_SEQUENTIAL)
+  target_compile_definitions(mandelbrot PUBLIC USE_SEQUENTIAL)
+endif()
 

@@ -1,3 +1,5 @@
+#ifdef USE_SEQUENTIAL
+
 #include "fractal/mandelbrot.hpp"
 
 #include <complex>
@@ -68,10 +70,8 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
 
   bool smooth_color = true;
 
-  // Experimental zoom (bugs ?). This will modify the fract window (the domain in which we
-  // calculate the fractal function)
-  // zoom(-1.28, -1.23, 0.01, 0.08, fract);  // Z2
-
   fractal(screen, fract, iter_max, escape_step, func, smooth_color);
   return;
 }
+
+#endif

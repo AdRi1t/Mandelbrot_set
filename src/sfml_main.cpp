@@ -10,8 +10,8 @@
 
 void sfml_handle(WindowDim<unsigned int> window_size, WindowDim<double> fract) {
   sf::ContextSettings settings;
-  settings.depthBits         = 24;
-  settings.stencilBits       = 8;
+  settings.depthBits = 24;
+  settings.stencilBits = 8;
   settings.antialiasingLevel = 4;
   sf::RenderWindow window(sf::VideoMode({window_size.width(), window_size.height()}),
                           "Mandelrot", sf::Style::Default, settings);
@@ -30,7 +30,10 @@ int main(int argc, char* argv[]) {
   GlobalConfig::print_configuration();
 
   WindowDim<uint32_t> screen(0, 1200, 0, 1200);
+  // WindowDim where we focus in the fractal
   WindowDim<double> fract(-2.2, 1.2, -1.7, 1.7);
+
+  GlobalConfig::set_fractDim(fract.width(), fract.height());
 
   sfml_handle(screen, fract);
 
