@@ -6,7 +6,7 @@
 #include "core/window_utils.hpp"
 #include "core/global_config.hpp"
 #include "fractal/mandelbrot.hpp"
-#include "save_image.hpp"
+#include "render/save_image.hpp"
 
 void updateTextureFromColorArray(sf::Texture &texture, const sf::Color *colorArray) {
   texture.update(reinterpret_cast<const sf::Uint8 *>(colorArray));
@@ -22,13 +22,13 @@ void makeTexture(const WindowDim<uint32_t> &screen, sf::Texture &texture) {
 }
 
 void plot(const WindowDim<uint32_t> &screen, uint32_t *escape_step, uint32_t iter_max,
-          sf::Sprite &fractal_sprite, sf::Texture &texture, sf::Color *pixelArray,
+          sf::Sprite& fractal_sprite, sf::Texture &texture, sf::Color *pixelArray,
           bool smooth_color = true) {
   size_t k = 0;
   for (unsigned int y = 0; y < screen.height(); y++) {
     for (unsigned int x = 0; x < screen.width(); x++) {
-      uint32_t n      = escape_step[k];
-      auto [r, g, b]  = get_rgb_smooth(n, iter_max);
+      uint32_t n = escape_step[k];
+      auto [r, g, b] = get_rgb_smooth(n, iter_max);
       pixelArray[k].r = r;
       pixelArray[k].g = g;
       pixelArray[k].b = b;
@@ -37,9 +37,7 @@ void plot(const WindowDim<uint32_t> &screen, uint32_t *escape_step, uint32_t ite
     }
   }
 
-  makeTexture(screen, texture);
   updateTextureFromColorArray(texture, pixelArray);
-  fractal_sprite.setTexture(texture);
   return;
 }
 
@@ -60,19 +58,26 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
   sf::Sprite fractal_sprite;
   sf::Texture fractal_texture;
 
+  makeTexture(screen, fractal_texture);
+  fractal_sprite.setTexture(fractal_texture);
+
   while (renderWindow->isOpen()) {
-    std::tie(center_x, center_y) = GlobalConfig::get_center();
-    auto zoom                    = GlobalConfig::get_zoom_level();
+    GlobalConfig::wait_to_draw();
     renderWindow->clear(sf::Color::Black);
 
+    std::tie(center_x, center_y) = GlobalConfig::get_center();
+    auto zoom = GlobalConfig::get_zoom_level();
     if (GlobalConfig::is_window_resized()) {
-      dim    = renderWindow->getSize();
+      dim = renderWindow->getSize();
       screen = WindowDim<uint32_t>(0, dim.x, 0, dim.y);
 
       delete[] escape_step;
       delete[] pixelArray;
       escape_step = new uint32_t[screen.size()];
-      pixelArray  = new sf::Color[screen.size()];
+      pixelArray = new sf::Color[screen.size()];
+
+      makeTexture(screen, fractal_texture);
+      fractal_sprite.setTexture(fractal_texture);
 
       WindowUtils::adjust_ratio(&screen, fract);
       GlobalConfig::set_fractDim(fract->width(), fract->height());
@@ -93,12 +98,12 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
     plot(screen, escape_step, GlobalConfig::get_iter_max(), fractal_sprite,
          fractal_texture, pixelArray);
 
+    renderWindow->draw(fractal_sprite);
+    renderWindow->display();
+
     LogInfo::set_display_time_ms(std::chrono::duration<float, std::milli>(
                                      std::chrono::steady_clock::now() - display_start)
                                      .count());
-
-    renderWindow->draw(fractal_sprite);
-    renderWindow->display();
     LogInfo::printLog();
   }
 

@@ -14,10 +14,11 @@ void sfml_handle(WindowDim<unsigned int> window_size, WindowDim<double> fract) {
   settings.stencilBits = 8;
   settings.antialiasingLevel = 4;
   sf::RenderWindow window(sf::VideoMode({window_size.width(), window_size.height()}),
-                          "Mandelrot", sf::Style::Default, settings);
+                          "Mandelbrot", sf::Style::Default, settings);
 
   window.setActive(false);
 
+  // std::thread julia_thread()
   std::thread rendering_thread(&render_handle, &window, &fract);
 
   handle_event(&window);

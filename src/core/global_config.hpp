@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <mutex>
+#include <condition_variable>
 
 namespace GlobalConfig {
 namespace {
@@ -13,9 +14,15 @@ struct ConfigData {
   double center_y;
   double fract_width;
   double fract_height;
+  bool need_redraw;  
   bool window_resized;
 };
 
+// Multi threads render
+extern std::condition_variable _render_condition;
+extern std::mutex _render_mutex;
+
+// Multi threads accessible 
 extern ConfigData _config_data;
 extern std::mutex _config_mutex;
 }  // namespace
@@ -33,6 +40,10 @@ std::pair<double, double> get_center();
 std::pair<double, double> get_fractDim();
 void print_configuration();
 
+// Notify fo redraw
+void need_redraw();
+void wait_to_draw();
+
 }  // namespace GlobalConfig
 
 namespace LogInfo {
@@ -41,7 +52,6 @@ namespace {
 struct LogData {
   float fractal_time_ms;
   float display_time_ms;
-  float fps;
 };
 
 extern LogData _log_data;
@@ -51,6 +61,5 @@ extern std::mutex _log_mutex;
 void printLog();
 void set_fractal_time(double time_ms);
 void set_display_time_ms(double time_ms);
-void set_fps(double time_ms);
 
 }  // namespace LogInfo

@@ -2,14 +2,18 @@
 
 namespace GlobalConfig {
 namespace {
-ConfigData _config_data{.iter_max       = 400,
-                        .zoom_level     = 1.0,
-                        .center_x       = 0.0,
-                        .center_y       = 0.0,
-                        .fract_width    = 0.0,
-                        .fract_height   = 0.0,
+ConfigData _config_data{.iter_max = 400,
+                        .zoom_level = 1.0,
+                        .center_x = 0.0,
+                        .center_y = 0.0,
+                        .fract_width = 0.0,
+                        .fract_height = 0.0,
+                        .need_redraw = true,
                         .window_resized = false};
 std::mutex _config_mutex;
+
+std::condition_variable _render_condition;
+std::mutex _render_mutex;
 }  // namespace
 
 void parse_from_argv(int argc, char* argv[]) {
@@ -37,25 +41,25 @@ void parse_from_argv(int argc, char* argv[]) {
 }
 
 void change_iter_max(int delta_iter_max) {
-  std::lock_guard<std::mutex> lock(_config_mutex);
+  std::lock_guard lock(_config_mutex);
   if (_config_data.iter_max + delta_iter_max > 0) {
     _config_data.iter_max += delta_iter_max;
   }
 }
 
 void change_zoom(double zoom_factor) {
-  std::lock_guard<std::mutex> lock(_config_mutex);
+  std::lock_guard lock(_config_mutex);
   _config_data.zoom_level *= zoom_factor;
 }
 
 void set_fractDim(double new_width, double new_height) {
-  std::lock_guard<std::mutex> lock(_config_mutex);
-  _config_data.fract_width  = new_width;
+  std::lock_guard lock(_config_mutex);
+  _config_data.fract_width = new_width;
   _config_data.fract_height = new_height;
 }
 
 void set_window_resized(bool resized) {
-  std::lock_guard<std::mutex> lock(_config_mutex);
+  std::lock_guard lock(_config_mutex);
   _config_data.window_resized = resized;
 }
 
@@ -65,8 +69,22 @@ std::pair<double, double> get_fractDim() {
   return std::make_pair(_config_data.fract_width, _config_data.fract_height);
 }
 
+void need_redraw() {
+  {
+    std::lock_guard lock(_render_mutex);
+    _config_data.need_redraw = true;
+  }
+  _render_condition.notify_all();
+}
+
+void wait_to_draw() {
+  std::unique_lock lock(_render_mutex);
+  _render_condition.wait(lock, []() { return _config_data.need_redraw; });
+  _config_data.need_redraw = false;
+}
+
 void move_center(double dx, double dy) {
-  std::lock_guard<std::mutex> lock(_config_mutex);
+  std::lock_guard lock(_config_mutex);
   _config_data.center_x += dx;
   _config_data.center_y += dy;
 }
@@ -92,7 +110,7 @@ void print_configuration() {
 
 namespace LogInfo {
 namespace {
-LogData _log_data{.fractal_time_ms = 0.0, .display_time_ms = 0.0, .fps = 0.0};
+LogData _log_data{.fractal_time_ms = 0.0, .display_time_ms = 0.0};
 std::mutex _log_mutex;
 }  // namespace
 
@@ -104,8 +122,7 @@ void printLog() {
             << "  Zoom level:     " << GlobalConfig::get_zoom_level() << "\n"
             << "  Iterations max: " << GlobalConfig::get_iter_max() << "\n\n"
             << "  Fractal time: " << _log_data.fractal_time_ms << " ms\n"
-            << "  Display time: " << _log_data.display_time_ms << " ms\n"
-            << "  FPS:          " << _log_data.fps << "\n";
+            << "  Display time: " << _log_data.display_time_ms << " ms\n";
 
   if (!std::cout) {
     std::cerr << "Error: Failed to write log information to standard output.\n";
@@ -120,11 +137,6 @@ void set_fractal_time(double time_ms) {
 void set_display_time_ms(double time_ms) {
   std::lock_guard<std::mutex> lock(_log_mutex);
   _log_data.display_time_ms = time_ms;
-}
-
-void set_fps(double fps) {
-  std::lock_guard<std::mutex> lock(_log_mutex);
-  _log_data.fps = fps;
 }
 
 }  // namespace LogInfo

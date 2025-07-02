@@ -55,7 +55,7 @@ set(MANDELBROT_SRC
   src/core/window_utils.cpp
   src/sfml/sfml_event.cpp
   src/sfml/sfml_render.cpp
-  src/save_image.cpp
+  src/render/save_image.cpp
   src/sfml_main.cpp
 )
 
