@@ -21,9 +21,8 @@ void makeTexture(const WindowDim<uint32_t> &screen, sf::Texture &texture) {
   return;
 }
 
-void plot(const WindowDim<uint32_t> &screen, uint32_t *escape_step, uint32_t iter_max,
-          sf::Sprite& fractal_sprite, sf::Texture &texture, sf::Color *pixelArray,
-          bool smooth_color = true) {
+void set_texture(const WindowDim<uint32_t> &screen, uint32_t *escape_step,
+                 uint32_t iter_max, sf::Texture &texture, sf::Color *pixelArray) {
   size_t k = 0;
   for (unsigned int y = 0; y < screen.height(); y++) {
     for (unsigned int x = 0; x < screen.width(); x++) {
@@ -95,8 +94,8 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
                                   .count());
 
     auto display_start = std::chrono::steady_clock::now();
-    plot(screen, escape_step, GlobalConfig::get_iter_max(), fractal_sprite,
-         fractal_texture, pixelArray);
+    set_texture(screen, escape_step, GlobalConfig::get_iter_max(), fractal_texture,
+                pixelArray);
 
     renderWindow->draw(fractal_sprite);
     renderWindow->display();

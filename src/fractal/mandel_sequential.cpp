@@ -54,13 +54,6 @@ void get_number_iterations(const WindowDim<uint32_t> &screen,
   }
 }
 
-template <FractalFunction Fractal_t>
-void fractal(const WindowDim<uint32_t> &screen, const WindowDim<double> &fract,
-             uint32_t iter_max, uint32_t *escape_step, Fractal_t func,
-             bool smooth_color) {
-  get_number_iterations(screen, fract, iter_max, escape_step, func);
-}
-
 void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
                 uint32_t *escape_step, uint32_t iter_max) {
   // The function used to calculate the fractal
@@ -68,9 +61,7 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
     return z * z + c;
   };
 
-  bool smooth_color = true;
-
-  fractal(screen, fract, iter_max, escape_step, func, smooth_color);
+  get_number_iterations(screen, fract, iter_max, escape_step, func);
   return;
 }
 

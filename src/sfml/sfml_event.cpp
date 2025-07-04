@@ -4,11 +4,12 @@
 #include <iostream>
 #include <thread>
 
-#include "render/save_image.hpp"
 #include "core/window_utils.hpp"
 #include "core/global_config.hpp"
+#include "fractal/mandelbrot.hpp"
+#include "render/save_image.hpp"
 
-void handle_event(sf::RenderWindow* const window) {
+void handle_event(sf::RenderWindow *const window) {
   sf::Event event;
   window->setActive(false);
   while (window->isOpen()) {
@@ -42,12 +43,23 @@ void handle_event(sf::RenderWindow* const window) {
           GlobalConfig::change_iter_max(-2);
         }
         if (event.key.code == sf::Keyboard::P) {
-          WindowDim<uint32_t> screenDim(0, window->getSize().x, 0, window->getSize().y);
-          std::string timestamp = now_to_string();
-          std::string filename = "mandelbrot_" + timestamp + ".png";
+          auto [c_x, c_y] = GlobalConfig::get_center();
+          double zoom_level = GlobalConfig::get_zoom_level();
 
-          sf::Vector2u dim = window->getSize();
-          WindowDim<uint32_t> screen(0, dim.x, 0, dim.y);
+          std::string position = pos_to_string(c_x, c_y, zoom_level);
+          std::string filename = now_to_string() + position + ".png";
+
+          WindowDim<uint32_t> screen(0, 1920, 0, 1080);
+          WindowDim<double> fract(0, 1920, 0, 1080);
+          WindowUtils::zoom(c_x, c_y, zoom_level, &fract);
+
+          uint32_t *escape_step = new uint32_t[screen.size()];
+          sf::Color *pixelArray = new sf::Color[screen.size()];
+
+          mandelbrot(screen, fract, escape_step, GlobalConfig::get_iter_max());
+          save_image(screen, escape_step, GlobalConfig::get_iter_max(), filename.c_str());
+          delete[] escape_step;
+          delete[] pixelArray;
         }
         GlobalConfig::need_redraw();
       }
