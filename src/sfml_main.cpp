@@ -18,12 +18,13 @@ void sfml_handle(WindowDim<unsigned int> window_size, WindowDim<double> fract) {
 
   window.setActive(false);
 
-  // std::thread julia_thread()
+  std::thread julia_thread(&julia_handle);
   std::thread rendering_thread(&render_handle, &window, &fract);
 
   handle_event(&window);
 
   rendering_thread.join();
+  julia_thread.join();
 }
 
 int main(int argc, char* argv[]) {

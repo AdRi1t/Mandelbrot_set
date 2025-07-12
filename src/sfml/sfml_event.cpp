@@ -22,7 +22,7 @@ void handle_event(sf::RenderWindow *const window) {
       }
 
       if (event.type == sf::Event::KeyPressed) {
-        const double moveSpeed = 0.15 * (1 / GlobalConfig::get_zoom_level());
+        const double moveSpeed = 0.15 / GlobalConfig::get_zoom_level();
 
         if (event.key.code == sf::Keyboard::Left) {
           GlobalConfig::move_center(-moveSpeed, 0);
@@ -80,17 +80,16 @@ void handle_event(sf::RenderWindow *const window) {
                                 static_cast<float>(mousePosition.y));
 
           auto [frac_width, frac_height] = GlobalConfig::get_fractDim();
-          float zoomFactor = event.mouseWheelScroll.delta > 0 ? 1.2 : 1 / 1.2;
+          double zoomFactor = event.mouseWheelScroll.delta > 0 ? 1.2 : 1 / 1.2;
           GlobalConfig::change_zoom(zoomFactor);
 
-          sf::Vector2f ratio(
-              static_cast<float>(frac_width) / static_cast<float>(windowSize.x),
-              static_cast<float>(frac_height) / static_cast<float>(windowSize.y));
+          double ratio_x = frac_width / static_cast<double>(windowSize.x);
+          double ratio_y = frac_height / static_cast<double>(windowSize.y);
 
           double delta_x =
-              0.5 * (mousePos.x - static_cast<float>(windowSize.x) / 2) * ratio.x;
+              0.5 * (mousePos.x - static_cast<float>(windowSize.x) * 0.5) * ratio_x;
           double delta_y =
-              0.5 * (mousePos.y - static_cast<float>(windowSize.y) / 2) * ratio.y;
+              0.5 * (mousePos.y - static_cast<float>(windowSize.y) * 0.5) * ratio_y;
 
           GlobalConfig::move_center(delta_x, delta_y);
           GlobalConfig::need_redraw();

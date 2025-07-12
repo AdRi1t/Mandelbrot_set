@@ -1,5 +1,7 @@
 #include "global_config.hpp"
 
+#include <iomanip>
+
 namespace GlobalConfig {
 namespace {
 ConfigData _config_data{.iter_max = 400,
@@ -16,6 +18,16 @@ std::condition_variable _render_condition;
 std::mutex _render_mutex;
 }  // namespace
 
+#define TRY_CATCH_DEFAULT_VALUE(var, expr, value)        \
+  try {                                                  \
+    var = expr;                                          \
+  } catch (const std::exception& e) {                    \
+    std::cerr << __FILE__ << ":" << __LINE__ << "\t"     \
+              << "Exception: \"" << e.what() << "\"\t"   \
+              << "Default value set: " << value << "\n"; \
+    var = value;                                         \
+  }
+
 void parse_from_argv(int argc, char* argv[]) {
   std::lock_guard<std::mutex> lock(_config_mutex);
 
@@ -30,12 +42,12 @@ void parse_from_argv(int argc, char* argv[]) {
                 << " [-h]                 for help" << std::endl;
       exit(0);
     } else if (arg == "-I" && i + 1 < argc) {
-      _config_data.iter_max = std::stoi(argv[++i]);
+      TRY_CATCH_DEFAULT_VALUE(_config_data.iter_max, std::stoi(argv[++i]), 500)
     } else if (arg == "-C" && i + 2 < argc) {
-      _config_data.center_x = std::stod(argv[++i]);
-      _config_data.center_y = std::stod(argv[++i]);
+      TRY_CATCH_DEFAULT_VALUE(_config_data.center_x, std::stod(argv[++i]), 0.0)
+      TRY_CATCH_DEFAULT_VALUE(_config_data.center_y, std::stod(argv[++i]), 0.0)
     } else if (arg == "-Z" && i + 1 < argc) {
-      _config_data.zoom_level = std::stod(argv[++i]);
+      TRY_CATCH_DEFAULT_VALUE(_config_data.zoom_level, std::stod(argv[++i]), 0.0)
     }
   }
 }
@@ -116,11 +128,14 @@ std::mutex _log_mutex;
 
 void printLog() {
   std::lock_guard<std::mutex> lock(_log_mutex);
+  std::cout << std::scientific << std::setprecision(6);
   std::cout << "Log Information:\n"
             << "  Center:       ( " << GlobalConfig::get_center().first << ", "
             << GlobalConfig::get_center().second << ")\n"
             << "  Zoom level:     " << GlobalConfig::get_zoom_level() << "\n"
-            << "  Iterations max: " << GlobalConfig::get_iter_max() << "\n\n"
+            << std::defaultfloat 
+            << "  Iterations max: " << GlobalConfig::get_iter_max()
+            << "\n\n"
             << "  Fractal time: " << _log_data.fractal_time_ms << " ms\n"
             << "  Display time: " << _log_data.display_time_ms << " ms\n";
 

@@ -67,7 +67,6 @@ __global__ void get_number_iterations(const WindowDim<uint32_t> screen,
   for (uint32_t j = col; j < width; j += stride) {
     escape_step[row * width + j] = row_data[j];
   }
-  __syncthreads();
   return;
 }
 
@@ -77,7 +76,7 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
     return hipCfma(z, z, c);
   };
 
-  dim3 block_size(512, 1, 1);
+  dim3 block_size(128, 1, 1);
   dim3 grid_size(screen.height(), 1, 1);
   uint32_t *d_escape_step;
   const size_t alloca_size = screen.size() * sizeof(uint32_t);
