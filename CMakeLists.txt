@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28.0)
+cmake_minimum_required(VERSION 3.23)
 
 project(mandelbrot LANGUAGES CXX VERSION 1.1)
 
@@ -76,7 +76,6 @@ target_include_directories(mandelbrot PUBLIC
 )
 
 if(ENABLE_HIP)
-  message(STATUS "HIP platform ${CMAKE_HIP_PLATFORM}")
   target_compile_definitions(mandelbrot PUBLIC USE_HIP)
   target_include_directories(mandelbrot PUBLIC ${HIP_INCLUDE_DIRS})
   target_link_libraries(mandelbrot PRIVATE ${HIP_LIBRARIES})
@@ -85,3 +84,8 @@ if(ENABLE_SEQUENTIAL)
   target_compile_definitions(mandelbrot PUBLIC USE_SEQUENTIAL)
 endif()
 
+message(STATUS "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
+message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")

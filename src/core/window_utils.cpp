@@ -19,12 +19,12 @@ void zoom(const double x0, const double x1, const double y0, const double y1,
 
 void zoom(const double center_x, const double center_y, const double new_zoom_level,
           WindowDim<double>* fract) {
-  const double zoom_factor = fract->get_zoom_level();
+  const double old_zoom_level = fract->get_zoom_level();
   double current_width = fract->width();
   double current_height = fract->height();
 
-  double new_width = current_width * zoom_factor / new_zoom_level;
-  double new_height = current_height * zoom_factor / new_zoom_level;
+  double new_width = current_width * (old_zoom_level / new_zoom_level);
+  double new_height = current_height * (old_zoom_level / new_zoom_level);
 
   const double half_width = new_width * 0.5;
   const double half_height = new_height * 0.5;

@@ -81,7 +81,6 @@ void handle_event(sf::RenderWindow *const window) {
 
           auto [frac_width, frac_height] = GlobalConfig::get_fractDim();
           double zoomFactor = event.mouseWheelScroll.delta > 0 ? 1.2 : 1 / 1.2;
-          GlobalConfig::change_zoom(zoomFactor);
 
           double ratio_x = frac_width / static_cast<double>(windowSize.x);
           double ratio_y = frac_height / static_cast<double>(windowSize.y);
@@ -91,6 +90,7 @@ void handle_event(sf::RenderWindow *const window) {
           double delta_y =
               0.5 * (mousePos.y - static_cast<float>(windowSize.y) * 0.5) * ratio_y;
 
+          GlobalConfig::change_zoom(zoomFactor);
           GlobalConfig::move_center(delta_x, delta_y);
           GlobalConfig::need_redraw();
         }

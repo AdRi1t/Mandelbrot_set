@@ -9,12 +9,13 @@ namespace GlobalConfig {
 namespace {
 struct ConfigData {
   uint32_t iter_max;
+  uint32_t color_scheme;
   double zoom_level;
   double center_x;
   double center_y;
   double fract_width;
   double fract_height;
-  bool need_redraw;  
+  bool need_redraw;
   bool window_resized;
 };
 
@@ -33,6 +34,7 @@ void change_zoom(double change_factor);
 void move_center(double x, double y);
 void set_fractDim(double fract_width, double fract_height);
 void set_window_resized(bool resized);
+void set_color_sheme(uint32_t id);
 uint32_t get_iter_max();
 double get_zoom_level();
 bool is_window_resized();

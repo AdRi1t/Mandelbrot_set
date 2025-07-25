@@ -75,6 +75,11 @@ void set_window_resized(bool resized) {
   _config_data.window_resized = resized;
 }
 
+void set_color_sheme(uint32_t id) {
+  std::lock_guard lock(_config_mutex);
+  _config_data.color_scheme = id;
+}
+
 bool is_window_resized() { return _config_data.window_resized; }
 
 std::pair<double, double> get_fractDim() {

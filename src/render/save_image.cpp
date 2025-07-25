@@ -27,7 +27,7 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n,
   return std::make_tuple(r, g, b);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_smooth(uint32_t n, uint32_t iter_max) {
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_1(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -37,6 +37,30 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_smooth(uint32_t n, uint32_t iter_m
   uint8_t b = (uint8_t)(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
   return std::make_tuple(r, g, b);
 }
+
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_2(uint32_t n, uint32_t iter_max) {
+  // map n on the 0..1 interval
+  double t = (double)n / (double)iter_max;
+
+  // Use smooth polynomials for r, g, b
+  uint8_t b = (uint8_t)(9 * (1 - t) * t * t * t * 255);
+  uint8_t g = (uint8_t)(15 * (1 - t) * (1 - t) * t * t * 255);
+  uint8_t r = (uint8_t)(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
+  return std::make_tuple(r, g, b);
+}
+
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_3(uint32_t n, uint32_t iter_max) {
+  // map n on the 0..1 interval
+  double t = (double)n / (double)iter_max;
+
+  // Use smooth polynomials for r, g, b
+  uint8_t r = (uint8_t)(9 * (1 - t) * t * t * t * 255);
+  uint8_t g = (uint8_t)(8 * (1 - t) * (1 - t) * t * t * 255);
+  uint8_t b = (uint8_t)(9 * (1 - t) * (1 - t) * (1 - t) * t * 255);
+  return std::make_tuple(r, g, b);
+}
+
+
 
 std::string now_to_string() {
   time_t t = time(nullptr);
@@ -84,7 +108,7 @@ void save_image(WindowDim<uint32_t> &scr, uint32_t *escape_step, uint32_t iter_m
     for (uint32_t j = scr.x_min(); j < scr.x_max(); ++j) {
       int n = escape_step[k];
 
-      rgb = get_rgb_smooth(n, iter_max);
+      rgb = get_rgb_sheme_1(n, iter_max);
 
       RGBQUAD col;
       col.rgbRed = std::get<0>(rgb);
