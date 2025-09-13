@@ -21,7 +21,7 @@ void plot(const WindowDim<uint32_t>& screen, uint32_t* d_escape_map, uint32_t it
   sf::Color* d_pixelArray;
   size_t alloc_size = screen.size() * sizeof(uint32_t);
   HIP_CHECK(hipSetDevice(0));
-  HIP_CHECK(hipmalloc((void**)&d_pixelArray, alloc_size))
+  HIP_CHECK(hipMalloc((void**)&d_pixelArray, alloc_size))
 }
 
 #endif

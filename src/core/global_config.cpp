@@ -65,7 +65,7 @@ void change_zoom(double zoom_factor) {
   _config_data.zoom_level *= zoom_factor;
 }
 
-void set_fractDim(double new_width, double new_height) {
+void set_fractal_dim(double new_width, double new_height) {
   std::lock_guard lock(_config_mutex);
   _config_data.fract_width  = new_width;
   _config_data.fract_height = new_height;
@@ -83,7 +83,7 @@ void set_color_scheme(uint32_t id) {
 
 bool is_window_resized() { return _config_data.window_resized; }
 
-std::pair<double, double> get_fractDim() {
+std::pair<double, double> get_fractal_dim() {
   return std::make_pair(_config_data.fract_width, _config_data.fract_height);
 }
 
@@ -132,7 +132,7 @@ LogData _log_data{.fractal_time_ms = 0.0, .display_time_ms = 0.0};
 std::mutex _log_mutex;
 }  // namespace
 
-void printLog() {
+void print_log() {
   std::lock_guard<std::mutex> lock(_log_mutex);
   std::cout << std::scientific << std::setprecision(6);
   std::cout << "Log Information:\n"

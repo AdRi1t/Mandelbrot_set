@@ -49,7 +49,7 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
   WindowUtils::zoom(center_x, center_y, GlobalConfig::get_zoom_level(), fract);
 
   WindowUtils::adjust_ratio(&screen, fract);
-  GlobalConfig::set_fractDim(fract->width(), fract->height());
+  GlobalConfig::set_fractal_dim(fract->width(), fract->height());
 
   uint32_t *escape_step = new uint32_t[screen.size()];
   sf::Color *pixelArray = new sf::Color[screen.size()];
@@ -77,12 +77,12 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
       fractal_sprite.setTexture(fractal_texture);
 
       WindowUtils::adjust_ratio(&screen, fract);
-      GlobalConfig::set_fractDim(fract->width(), fract->height());
+      GlobalConfig::set_fractal_dim(fract->width(), fract->height());
       GlobalConfig::set_window_resized(false);
     }
     std::tie(center_x, center_y) = GlobalConfig::get_center();
     auto zoom                    = GlobalConfig::get_zoom_level();
-    GlobalConfig::set_fractDim(fract->width(), fract->height());
+    GlobalConfig::set_fractal_dim(fract->width(), fract->height());
     WindowUtils::zoom(center_x, center_y, zoom, fract);
 
     auto fractal_start = std::chrono::steady_clock::now();
@@ -102,7 +102,7 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
     LogInfo::set_display_time_ms(std::chrono::duration<float, std::milli>(
                                      std::chrono::steady_clock::now() - display_start)
                                      .count());
-    LogInfo::printLog();
+    LogInfo::print_log();
   }
 
   delete[] escape_step;

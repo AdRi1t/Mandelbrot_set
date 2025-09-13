@@ -18,7 +18,7 @@ void sfml_handle(WindowDim<unsigned int> window_size, WindowDim<double> fract) {
 
   window.setActive(false);
 
-  //std::thread julia_thread(&julia_handle);
+  // std::thread julia_thread(&julia_handle);
   std::thread rendering_thread(&render_handle, &window, &fract);
 
   handle_event(&window);
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
   // WindowDim : where we focus in the fractal
   WindowDim<double> fract(-2.2, 1.2, -1.7, 1.7);
 
-  GlobalConfig::set_fractDim(fract.width(), fract.height());
+  GlobalConfig::set_fractal_dim(fract.width(), fract.height());
 
   sfml_handle(screen, fract);
 

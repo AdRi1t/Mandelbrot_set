@@ -32,14 +32,14 @@ void parse_from_argv(int argc, char* argv[]);
 void change_iter_max(int delta_iter_max);
 void change_zoom(double change_factor);
 void move_center(double x, double y);
-void set_fractDim(double fract_width, double fract_height);
+void set_fractal_dim(double fract_width, double fract_height);
 void set_window_resized(bool resized);
 void set_color_scheme(uint32_t id);
 uint32_t get_iter_max();
 double get_zoom_level();
 bool is_window_resized();
 std::pair<double, double> get_center();
-std::pair<double, double> get_fractDim();
+std::pair<double, double> get_fractal_dim();
 void print_configuration();
 
 // Notify fo redraw
@@ -60,7 +60,7 @@ extern LogData _log_data;
 extern std::mutex _log_mutex;
 }  // namespace
 
-void printLog();
+void print_log();
 void set_fractal_time(double time_ms);
 void set_display_time_ms(double time_ms);
 

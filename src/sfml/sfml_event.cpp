@@ -82,7 +82,7 @@ void handle_event(sf::RenderWindow *const window) {
           sf::Vector2f mousePos(static_cast<float>(mousePosition.x),
                                 static_cast<float>(mousePosition.y));
 
-          auto [frac_width, frac_height] = GlobalConfig::get_fractDim();
+          auto [frac_width, frac_height] = GlobalConfig::get_fractal_dim();
           double zoomFactor = event.mouseWheelScroll.delta > 0 ? 1.2 : 1 / 1.2;
 
           double ratio_x = frac_width / static_cast<double>(windowSize.x);

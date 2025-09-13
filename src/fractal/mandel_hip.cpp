@@ -79,12 +79,12 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
   dim3 block_size(128, 1, 1);
   dim3 grid_size(screen.height(), 1, 1);
   uint32_t *d_escape_step;
-  const size_t alloca_size       = screen.size() * sizeof(uint32_t);
+  const size_t alloc_size        = screen.size() * sizeof(uint32_t);
   const size_t shared_space_size = screen.width() * sizeof(uint32_t);
 
   HIP_CHECK(hipSetDevice(0));
-  HIP_CHECK(hipMalloc((void **)&d_escape_step, alloca_size));
-  HIP_CHECK(hipMemset(d_escape_step, 0, alloca_size));
+  HIP_CHECK(hipMalloc((void **)&d_escape_step, alloc_size));
+  HIP_CHECK(hipMemset(d_escape_step, 0, alloc_size));
 
   hipLaunchKernelGGL(HIP_KERNEL_NAME(get_number_iterations<decltype(func)>), grid_size,
                      block_size, shared_space_size, hipStreamDefault, screen, fract,
@@ -93,7 +93,7 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
   HIP_CHECK(hipDeviceSynchronize());
   HIP_CHECK(hipGetLastError());
 
-  HIP_CHECK(hipMemcpy(escape_step, d_escape_step, alloca_size, hipMemcpyDeviceToHost));
+  HIP_CHECK(hipMemcpy(escape_step, d_escape_step, alloc_size, hipMemcpyDeviceToHost));
   HIP_CHECK(hipDeviceSynchronize());
   HIP_CHECK(hipFree(d_escape_step));
   return;
