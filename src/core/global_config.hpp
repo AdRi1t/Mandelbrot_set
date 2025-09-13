@@ -23,7 +23,7 @@ struct ConfigData {
 extern std::condition_variable _render_condition;
 extern std::mutex _render_mutex;
 
-// Multi threads accessible 
+// Multi threads accessible
 extern ConfigData _config_data;
 extern std::mutex _config_mutex;
 }  // namespace
@@ -34,7 +34,7 @@ void change_zoom(double change_factor);
 void move_center(double x, double y);
 void set_fractDim(double fract_width, double fract_height);
 void set_window_resized(bool resized);
-void set_color_sheme(uint32_t id);
+void set_color_scheme(uint32_t id);
 uint32_t get_iter_max();
 double get_zoom_level();
 bool is_window_resized();

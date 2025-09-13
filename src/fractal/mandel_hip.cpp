@@ -37,7 +37,7 @@ DEVICE_INLINE_FUNCTION Complex scale(const WindowDim<uint32_t> &screen,
 
 template <FractalFunction Fractal_t>
 DEVICE_INLINE_FUNCTION uint32_t escape(Complex c, uint32_t iter_max, Fractal_t func) {
-  Complex z = make_hipDoubleComplex(0, 0);
+  Complex z     = make_hipDoubleComplex(0, 0);
   uint32_t iter = 0;
   while (hipCabs(z) < 2.0 && iter < iter_max) {
     z = func(z, c);
@@ -52,15 +52,15 @@ template <FractalFunction Fractal_t>
 __global__ void get_number_iterations(const WindowDim<uint32_t> screen,
                                       const WindowDim<double> fract, uint32_t iter_max,
                                       uint32_t *escape_step, Fractal_t func) {
-  const uint32_t col = threadIdx.x;
-  const uint32_t row = blockIdx.x;
+  const uint32_t col    = threadIdx.x;
+  const uint32_t row    = blockIdx.x;
   const uint32_t stride = blockDim.x;
-  const uint32_t width = screen.width();
+  const uint32_t width  = screen.width();
   extern __shared__ uint32_t row_data[];
 
   for (uint32_t j = col; j < width; j += stride) {
-    Complex c = make_hipDoubleComplex((double)j, (double)row);
-    c = scale(screen, fract, c);
+    Complex c   = make_hipDoubleComplex((double)j, (double)row);
+    c           = scale(screen, fract, c);
     row_data[j] = escape(c, iter_max, func);
   }
   __syncthreads();
@@ -79,9 +79,9 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
   dim3 block_size(128, 1, 1);
   dim3 grid_size(screen.height(), 1, 1);
   uint32_t *d_escape_step;
-  const size_t alloca_size = screen.size() * sizeof(uint32_t);
+  const size_t alloca_size       = screen.size() * sizeof(uint32_t);
   const size_t shared_space_size = screen.width() * sizeof(uint32_t);
-  
+
   HIP_CHECK(hipSetDevice(0));
   HIP_CHECK(hipMalloc((void **)&d_escape_step, alloca_size));
   HIP_CHECK(hipMemset(d_escape_step, 0, alloca_size));

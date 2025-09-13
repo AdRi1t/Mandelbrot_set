@@ -33,6 +33,9 @@ void handle_event(sf::RenderWindow *const window) {
         if (event.key.code == sf::Keyboard::Up) {
           GlobalConfig::move_center(0, -moveSpeed);
         }
+        if (event.key.code == sf::Keyboard::Tab) {
+          // GlobalConfig::s
+        }
         if (event.key.code == sf::Keyboard::Down) {
           GlobalConfig::move_center(0, moveSpeed);
         }
@@ -43,7 +46,7 @@ void handle_event(sf::RenderWindow *const window) {
           GlobalConfig::change_iter_max(-2);
         }
         if (event.key.code == sf::Keyboard::P) {
-          auto [c_x, c_y] = GlobalConfig::get_center();
+          auto [c_x, c_y]   = GlobalConfig::get_center();
           double zoom_level = GlobalConfig::get_zoom_level();
 
           std::string position = pos_to_string(c_x, c_y, zoom_level);
@@ -74,7 +77,7 @@ void handle_event(sf::RenderWindow *const window) {
 
       if (event.type == sf::Event::MouseWheelScrolled) {
         if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
-          sf::Vector2u windowSize = window->getSize();
+          sf::Vector2u windowSize    = window->getSize();
           sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
           sf::Vector2f mousePos(static_cast<float>(mousePosition.x),
                                 static_cast<float>(mousePosition.y));

@@ -20,13 +20,13 @@ void zoom(const double x0, const double x1, const double y0, const double y1,
 void zoom(const double center_x, const double center_y, const double new_zoom_level,
           WindowDim<double>* fract) {
   const double old_zoom_level = fract->get_zoom_level();
-  double current_width = fract->width();
-  double current_height = fract->height();
+  double current_width        = fract->width();
+  double current_height       = fract->height();
 
-  double new_width = current_width * (old_zoom_level / new_zoom_level);
+  double new_width  = current_width * (old_zoom_level / new_zoom_level);
   double new_height = current_height * (old_zoom_level / new_zoom_level);
 
-  const double half_width = new_width * 0.5;
+  const double half_width  = new_width * 0.5;
   const double half_height = new_height * 0.5;
 
   double new_x0 = center_x - half_width;
@@ -50,9 +50,9 @@ void adjust_ratio(const WindowDim<uint32_t>* screen, WindowDim<double>* fract) {
   double window_ratio =
       static_cast<double>(screen->width()) / static_cast<double>(screen->height());
 
-  double fract_width = fract->width();
+  double fract_width  = fract->width();
   double fract_height = fract->height();
-  double fract_ratio = fract_width / fract_height;
+  double fract_ratio  = fract_width / fract_height;
 
   double center_x = fract->x_min() + fract_width * 0.5;
   double center_y = fract->y_min() + fract_height * 0.5;
@@ -63,8 +63,8 @@ void adjust_ratio(const WindowDim<uint32_t>* screen, WindowDim<double>* fract) {
     fract->reset(new_x_min, new_x_max, fract->y_min(), fract->y_max());
   } else if (fract_ratio > window_ratio) {
     double new_height = fract_width / window_ratio;
-    double new_y_min = center_y - new_height * 0.5;
-    double new_y_max = center_y + new_height * 0.5;
+    double new_y_min  = center_y - new_height * 0.5;
+    double new_y_max  = center_y + new_height * 0.5;
     fract->reset(fract->x_min(), fract->x_max(), new_y_min, new_y_max);
   }
 }

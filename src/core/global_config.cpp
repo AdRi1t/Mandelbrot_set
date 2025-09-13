@@ -4,13 +4,14 @@
 
 namespace GlobalConfig {
 namespace {
-ConfigData _config_data{.iter_max = 400,
-                        .zoom_level = 1.0,
-                        .center_x = 0.0,
-                        .center_y = 0.0,
-                        .fract_width = 0.0,
-                        .fract_height = 0.0,
-                        .need_redraw = true,
+ConfigData _config_data{.iter_max       = 400,
+                        .color_scheme   = 0,
+                        .zoom_level     = 1.0,
+                        .center_x       = 0.0,
+                        .center_y       = 0.0,
+                        .fract_width    = 0.0,
+                        .fract_height   = 0.0,
+                        .need_redraw    = true,
                         .window_resized = false};
 std::mutex _config_mutex;
 
@@ -33,20 +34,20 @@ void parse_from_argv(int argc, char* argv[]) {
 
   for (int i = 1; i < argc; i++) {
     std::string_view arg(argv[i]);
-    if (arg == "-h") {
+    if (arg == "-h" || arg == "--help") {
       std::cout << "Mandelbrot \n"
                 << "Options: \n"
-                << " [-I <int>]           iter max\n"
-                << " [-C <float> <float>] center \n"
-                << " [-Z <float>]         zoom level \n"
-                << " [-h]                 for help" << std::endl;
+                << " [-i <int>]            iter max\n"
+                << " [-c <float> <float>]  center \n"
+                << " [-z <float>]          zoom level \n"
+                << " [-h, --help]          for help" << std::endl;
       exit(0);
-    } else if (arg == "-I" && i + 1 < argc) {
+    } else if (arg == "-i" && i + 1 < argc) {
       TRY_CATCH_DEFAULT_VALUE(_config_data.iter_max, std::stoi(argv[++i]), 500)
-    } else if (arg == "-C" && i + 2 < argc) {
+    } else if (arg == "-c" && i + 2 < argc) {
       TRY_CATCH_DEFAULT_VALUE(_config_data.center_x, std::stod(argv[++i]), 0.0)
       TRY_CATCH_DEFAULT_VALUE(_config_data.center_y, std::stod(argv[++i]), 0.0)
-    } else if (arg == "-Z" && i + 1 < argc) {
+    } else if (arg == "-z" && i + 1 < argc) {
       TRY_CATCH_DEFAULT_VALUE(_config_data.zoom_level, std::stod(argv[++i]), 0.0)
     }
   }
@@ -66,7 +67,7 @@ void change_zoom(double zoom_factor) {
 
 void set_fractDim(double new_width, double new_height) {
   std::lock_guard lock(_config_mutex);
-  _config_data.fract_width = new_width;
+  _config_data.fract_width  = new_width;
   _config_data.fract_height = new_height;
 }
 
@@ -75,7 +76,7 @@ void set_window_resized(bool resized) {
   _config_data.window_resized = resized;
 }
 
-void set_color_sheme(uint32_t id) {
+void set_color_scheme(uint32_t id) {
   std::lock_guard lock(_config_mutex);
   _config_data.color_scheme = id;
 }
@@ -138,8 +139,7 @@ void printLog() {
             << "  Center:       ( " << GlobalConfig::get_center().first << ", "
             << GlobalConfig::get_center().second << ")\n"
             << "  Zoom level:     " << GlobalConfig::get_zoom_level() << "\n"
-            << std::defaultfloat 
-            << "  Iterations max: " << GlobalConfig::get_iter_max()
+            << std::defaultfloat << "  Iterations max: " << GlobalConfig::get_iter_max()
             << "\n\n"
             << "  Fractal time: " << _log_data.fractal_time_ms << " ms\n"
             << "  Display time: " << _log_data.display_time_ms << " ms\n";

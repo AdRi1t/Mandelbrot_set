@@ -26,8 +26,8 @@ void set_texture(const WindowDim<uint32_t> &screen, uint32_t *escape_step,
   size_t k = 0;
   for (unsigned int y = 0; y < screen.height(); y++) {
     for (unsigned int x = 0; x < screen.width(); x++) {
-      uint32_t n = escape_step[k];
-      auto [r, g, b] = get_rgb_sheme_3(n, iter_max);
+      uint32_t n      = escape_step[k];
+      auto [r, g, b]  = get_rgb_scheme_3(n, iter_max);
       pixelArray[k].r = r;
       pixelArray[k].g = g;
       pixelArray[k].b = b;
@@ -65,13 +65,13 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
     renderWindow->clear(sf::Color::Black);
 
     if (GlobalConfig::is_window_resized()) {
-      dim = renderWindow->getSize();
+      dim    = renderWindow->getSize();
       screen = WindowDim<uint32_t>(0, dim.x, 0, dim.y);
 
       delete[] escape_step;
       delete[] pixelArray;
       escape_step = new uint32_t[screen.size()];
-      pixelArray = new sf::Color[screen.size()];
+      pixelArray  = new sf::Color[screen.size()];
 
       makeTexture(screen, fractal_texture);
       fractal_sprite.setTexture(fractal_texture);
@@ -81,7 +81,7 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
       GlobalConfig::set_window_resized(false);
     }
     std::tie(center_x, center_y) = GlobalConfig::get_center();
-    auto zoom = GlobalConfig::get_zoom_level();
+    auto zoom                    = GlobalConfig::get_zoom_level();
     GlobalConfig::set_fractDim(fract->width(), fract->height());
     WindowUtils::zoom(center_x, center_y, zoom, fract);
 

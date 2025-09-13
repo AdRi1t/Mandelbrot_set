@@ -3,9 +3,9 @@
 #define INLINE_FUNCTION inline
 
 #ifdef USE_HIP
-#define UNIVERSAL_FUNCTION INLINE_FUNCTION __host__ __device__
+#define DEVICE_HOST_INLINE INLINE_FUNCTION __host__ __device__
 #else
-#define UNIVERSAL_FUNCTION INLINE_FUNCTION
+#define DEVICE_HOST_INLINE INLINE_FUNCTION
 #endif
 
 template <typename T>
@@ -17,28 +17,28 @@ struct WindowDim {
       : _x_min(x_min), _x_max(x_max), _y_min(y_min), _y_max(y_max), _zoom_level(1.0) {}
 
   // Utility functions for getting the size, width and height of the window
-  UNIVERSAL_FUNCTION T size() const { return (width() * height()); }
+  DEVICE_HOST_INLINE T size() const { return (width() * height()); }
 
-  UNIVERSAL_FUNCTION T width() const { return (_x_max - _x_min); }
+  DEVICE_HOST_INLINE T width() const { return (_x_max - _x_min); }
 
-  UNIVERSAL_FUNCTION T height() const { return (_y_max - _y_min); }
+  DEVICE_HOST_INLINE T height() const { return (_y_max - _y_min); }
 
-  UNIVERSAL_FUNCTION T get_zoom_level() const { return (_zoom_level); }
+  DEVICE_HOST_INLINE T get_zoom_level() const { return (_zoom_level); }
 
   // Getters and setters for the window elements
-  UNIVERSAL_FUNCTION T x_min() const { return _x_min; }
+  DEVICE_HOST_INLINE T x_min() const { return _x_min; }
 
   void x_min(T x_min) { _x_min = x_min; }
 
-  UNIVERSAL_FUNCTION T x_max() const { return _x_max; }
+  DEVICE_HOST_INLINE T x_max() const { return _x_max; }
 
   void x_max(T x_max) { _x_max = x_max; }
 
-  UNIVERSAL_FUNCTION T y_min() const { return _y_min; }
+  DEVICE_HOST_INLINE T y_min() const { return _y_min; }
 
   void y_min(T y_min) { _y_min = y_min; }
 
-  UNIVERSAL_FUNCTION T y_max() const { return _y_max; }
+  DEVICE_HOST_INLINE T y_max() const { return _y_max; }
 
   void y_max(T y_max) { _y_max = y_max; }
 

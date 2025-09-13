@@ -6,14 +6,21 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <concepts>
 
 #include <FreeImage.h>
 
 #include "core/window_dim.hpp"
 
+template <typename F, typename T>
+concept ColorSchemeFunction =
+    std::invocable<F, T, T> && std::integral<T> && requires(F f, T n, T max) {
+      { f(n, max) } -> std::convertible_to<std::tuple<uint8_t, uint8_t, uint8_t>>;
+    };
+
 std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n,
                                                                uint32_t iter_max) {
-  int N = 256;  // colors per element
+  int N  = 256;  // colors per element
   int N3 = N * N * N;
   // map n on the 0..1 interval (real numbers)
   double t = (double)n / (double)iter_max;
@@ -21,13 +28,13 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n,
   n = (int)(t * (double)N3);
 
   uint8_t b = n / (N * N);
-  int nn = n - b * N * N;
+  int nn    = n - b * N * N;
   uint8_t r = nn / N;
   uint8_t g = nn - r * N;
   return std::make_tuple(r, g, b);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_1(uint32_t n, uint32_t iter_max) {
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_1(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -38,7 +45,7 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_1(uint32_t n, uint32_t iter_
   return std::make_tuple(r, g, b);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_2(uint32_t n, uint32_t iter_max) {
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_2(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -49,7 +56,7 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_2(uint32_t n, uint32_t iter_
   return std::make_tuple(r, g, b);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_3(uint32_t n, uint32_t iter_max) {
+std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_3(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -60,10 +67,8 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_sheme_3(uint32_t n, uint32_t iter_
   return std::make_tuple(r, g, b);
 }
 
-
-
 std::string now_to_string() {
-  time_t t = time(nullptr);
+  time_t t    = time(nullptr);
   tm *tm_time = localtime(&t);
 
   if (tm_time == nullptr) {
@@ -97,8 +102,8 @@ void save_image(WindowDim<uint32_t> &scr, uint32_t *escape_step, uint32_t iter_m
   FreeImage_Initialise();
 #endif
 
-  uint32_t width = scr.width();
-  uint32_t height = scr.height();
+  uint32_t width   = scr.width();
+  uint32_t height  = scr.height();
   FIBITMAP *bitmap = FreeImage_Allocate(width, height, 32);  // RGBA
 
   int k = 0;
@@ -108,12 +113,12 @@ void save_image(WindowDim<uint32_t> &scr, uint32_t *escape_step, uint32_t iter_m
     for (uint32_t j = scr.x_min(); j < scr.x_max(); ++j) {
       int n = escape_step[k];
 
-      rgb = get_rgb_sheme_1(n, iter_max);
+      rgb = get_rgb_scheme_1(n, iter_max);
 
       RGBQUAD col;
-      col.rgbRed = std::get<0>(rgb);
-      col.rgbGreen = std::get<1>(rgb);
-      col.rgbBlue = std::get<2>(rgb);
+      col.rgbRed      = std::get<0>(rgb);
+      col.rgbGreen    = std::get<1>(rgb);
+      col.rgbBlue     = std::get<2>(rgb);
       col.rgbReserved = 255;
 
       FreeImage_SetPixelColor(bitmap, j, i, &col);

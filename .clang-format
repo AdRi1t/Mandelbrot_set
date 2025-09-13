@@ -4,7 +4,7 @@ ReferenceAlignment: Left
 BasedOnStyle: Google
 SortIncludes: false
 ColumnLimit: 90
-AlignConsecutiveAssignments: false
+AlignConsecutiveAssignments: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: true
 

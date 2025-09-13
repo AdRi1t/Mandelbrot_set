@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(mandelbrot LANGUAGES CXX VERSION 1.1)
+project(mandelbrot LANGUAGES CXX VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,8 +15,16 @@ if(ENABLE_OPENMP AND ENABLE_HIP)
 endif()
 
 if(ENABLE_HIP)
-  list(APPEND CMAKE_PREFIX_PATH "/opt/rocm/hip" "/opt/rocm")
-  find_package(HIP REQUIRED)
+  if(NOT DEFINED ROCM_PATH)
+    list(APPEND CMAKE_PREFIX_PATH "/opt/rocm")
+  else()
+    list(APPEND CMAKE_PREFIX_PATH ${ROCM_PATH})
+    set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    link_directories("${ROCM_PATH}/lib")
+    include_directories("${ROCM_PATH}/include")
+  endif()
+  find_package(HIP QUIET)
   if(HIP_FOUND)
     message(STATUS "Found HIP package")
     set(CMAKE_CXX_COMPILER ${HIPCC})
@@ -28,7 +36,7 @@ if(ENABLE_HIP)
   endif()
 endif()
 
-# Try sanitizers
+# sanitizers
 if(ENABLE_SANITIZERS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT ENABLE_HIP)
     message(STATUS "Enabling Address and Memory Sanitizers")
@@ -66,7 +74,7 @@ else()
   list(APPEND MANDELBROT_SRC src/fractal/mandel_sequential.cpp)
 endif()
 
-add_compile_options(-Wall -Wextra)
+add_compile_options(-march=native -Wall -Wextra)
 
 add_executable(mandelbrot ${MANDELBROT_SRC})
 target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} sfml-graphics sfml-window sfml-system)
@@ -80,12 +88,36 @@ if(ENABLE_HIP)
   target_include_directories(mandelbrot PUBLIC ${HIP_INCLUDE_DIRS})
   target_link_libraries(mandelbrot PRIVATE ${HIP_LIBRARIES})
 endif()
+
 if(ENABLE_SEQUENTIAL)
   target_compile_definitions(mandelbrot PUBLIC USE_SEQUENTIAL)
 endif()
 
+message(STATUS "CMAKE Status:")
 message(STATUS "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
 message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")
+message(STATUS "CMAKE_BUILD_RPATH: ${CMAKE_BUILD_RPATH}")
+message(STATUS "CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+execute_process(COMMAND git log -n 1 --format="%h %an %cd %s"
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/${BRANCH}
+                OUTPUT_VARIABLE GIT_LOG
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND git branch --show-current -v
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/${BRANCH}
+                OUTPUT_VARIABLE GIT_BRANCH
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND git status -s
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/${BRANCH}
+                OUTPUT_VARIABLE MODIFIED_FILES
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+message(STATUS "GIT Status:")
+message(STATUS "Git log:\n${GIT_LOG}")
+message(STATUS "Current branch:\n${GIT_BRANCH}")
+message(STATUS "Modified files:\n${MODIFIED_FILES}")

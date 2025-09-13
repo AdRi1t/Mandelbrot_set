@@ -15,7 +15,6 @@ using Complex = hipDoubleComplex;
     }                                                                    \
   }
 
-
 void plot(const WindowDim<uint32_t>& screen, uint32_t* d_escape_map, uint32_t iter_max,
           sf::Sprite& fractal_sprite, sf::Texture, sf::Color* pixelArray,
           bool smooth_color) {
@@ -23,7 +22,6 @@ void plot(const WindowDim<uint32_t>& screen, uint32_t* d_escape_map, uint32_t it
   size_t alloc_size = screen.size() * sizeof(uint32_t);
   HIP_CHECK(hipSetDevice(0));
   HIP_CHECK(hipmalloc((void**)&d_pixelArray, alloc_size))
-
 }
 
 #endif
