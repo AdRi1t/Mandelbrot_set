@@ -6,20 +6,37 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <functional>
 #include <concepts>
 
 #include <FreeImage.h>
 
 #include "core/window_dim.hpp"
+#include "core/global_config.hpp"
 
 template <typename F, typename T>
 concept ColorSchemeFunction =
     std::invocable<F, T, T> && std::integral<T> && requires(F f, T n, T max) {
-      { f(n, max) } -> std::convertible_to<std::tuple<uint8_t, uint8_t, uint8_t>>;
+      { f(n, max) } -> std::convertible_to<typename ColorSchemes::ColorScheme>;
     };
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n,
-                                                               uint32_t iter_max) {
+namespace ColorSchemes {
+
+constexpr auto color_scheme_functions =
+    std::make_tuple(&piecewise_linear, &scheme_1, &scheme_2, &scheme_3);
+
+ColorScheme get_color(uint32_t n, uint32_t iter_max) {
+  uint32_t idx = GlobalConfig::get_color_scheme();
+  switch (idx % 4) {
+    case 0: return std::invoke(std::get<0>(color_scheme_functions), n, iter_max);
+    case 1: return std::invoke(std::get<1>(color_scheme_functions), n, iter_max);
+    case 2: return std::invoke(std::get<2>(color_scheme_functions), n, iter_max);
+    case 3: return std::invoke(std::get<3>(color_scheme_functions), n, iter_max);
+    default: return std::invoke(std::get<1>(color_scheme_functions), n, iter_max);
+  }
+}
+
+ColorScheme piecewise_linear(uint32_t n, uint32_t iter_max) {
   int N  = 256;  // colors per element
   int N3 = N * N * N;
   // map n on the 0..1 interval (real numbers)
@@ -34,7 +51,7 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_piecewise_linear(uint32_t n,
   return std::make_tuple(r, g, b);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_1(uint32_t n, uint32_t iter_max) {
+ColorScheme scheme_1(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -45,7 +62,7 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_1(uint32_t n, uint32_t iter
   return std::make_tuple(r, g, b);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_2(uint32_t n, uint32_t iter_max) {
+ColorScheme scheme_2(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -56,7 +73,7 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_2(uint32_t n, uint32_t iter
   return std::make_tuple(r, g, b);
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_3(uint32_t n, uint32_t iter_max) {
+ColorScheme scheme_3(uint32_t n, uint32_t iter_max) {
   // map n on the 0..1 interval
   double t = (double)n / (double)iter_max;
 
@@ -66,6 +83,8 @@ std::tuple<uint8_t, uint8_t, uint8_t> get_rgb_scheme_3(uint32_t n, uint32_t iter
   uint8_t b = (uint8_t)(9 * (1 - t) * (1 - t) * (1 - t) * t * 255);
   return std::make_tuple(r, g, b);
 }
+
+}  // namespace ColorSchemes
 
 std::string now_to_string() {
   time_t t    = time(nullptr);
@@ -107,13 +126,13 @@ void save_image(WindowDim<uint32_t> &scr, uint32_t *escape_step, uint32_t iter_m
   FIBITMAP *bitmap = FreeImage_Allocate(width, height, 32);  // RGBA
 
   int k = 0;
-  std::tuple<uint8_t, uint8_t, uint8_t> rgb;
+  ColorSchemes::ColorScheme rgb;
 
   for (uint32_t i = scr.y_min(); i < scr.y_max(); ++i) {
     for (uint32_t j = scr.x_min(); j < scr.x_max(); ++j) {
       int n = escape_step[k];
 
-      rgb = get_rgb_scheme_1(n, iter_max);
+      rgb = ColorSchemes::scheme_1(n, iter_max);
 
       RGBQUAD col;
       col.rgbRed      = std::get<0>(rgb);
@@ -137,3 +156,8 @@ void save_image(WindowDim<uint32_t> &scr, uint32_t *escape_step, uint32_t iter_m
   FreeImage_DeInitialise();
 #endif
 }
+
+static_assert(ColorSchemeFunction<decltype(ColorSchemes::piecewise_linear), uint32_t>);
+static_assert(ColorSchemeFunction<decltype(ColorSchemes::scheme_1), uint32_t>);
+static_assert(ColorSchemeFunction<decltype(ColorSchemes::scheme_2), uint32_t>);
+static_assert(ColorSchemeFunction<decltype(ColorSchemes::scheme_3), uint32_t>);

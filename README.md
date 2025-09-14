@@ -47,6 +47,7 @@ cmake --build build_mandelbrot -j 4
 - **Navigation**: Use arrow keys to move around the fractal
 - **Zoom**: Use `mousewheel` to zoom in and out
 - **Iterations**: Use `a` to increase and `e` to decrease maximum iterations
+- **Style**: Use `Tab` to switch between color schemes
 - **Save**: Press `s` to save an image of the current view (not working !)
 
 > **Note:** Window resizing doesn't work.
@@ -79,7 +80,3 @@ The project is structured into several components:
 - **/sfml**: Management of graphical interface and events
 - **/render**: Coloration and rendering of the fractal
 
-## License
-
-This project is based on work originally released under GPL v3 by Sol from [solarianprogrammer.com](http://www.solarianprogrammer.com) and is distributed under the same license. For more details see:
-http://www.gnu.org/copyleft/gpl.html

@@ -19,9 +19,5 @@ jobs:
       - name: Lint Code Base
         uses: super-linter/super-linter@v8.0.0
         env:
-          VALIDATE_CPP: true
-          VALIDATE_CLANG_FORMAT: true
           CPP_CLANG_FORMAT_CONFIG_FILE: .clang-format
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_YAML: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

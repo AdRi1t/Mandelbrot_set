@@ -27,7 +27,7 @@ void set_texture(const WindowDim<uint32_t> &screen, uint32_t *escape_step,
   for (unsigned int y = 0; y < screen.height(); y++) {
     for (unsigned int x = 0; x < screen.width(); x++) {
       uint32_t n      = escape_step[k];
-      auto [r, g, b]  = get_rgb_scheme_3(n, iter_max);
+      auto [r, g, b]  = ColorSchemes::get_color(n, iter_max);
       pixelArray[k].r = r;
       pixelArray[k].g = g;
       pixelArray[k].b = b;

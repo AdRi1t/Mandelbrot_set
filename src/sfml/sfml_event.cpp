@@ -34,7 +34,7 @@ void handle_event(sf::RenderWindow *const window) {
           GlobalConfig::move_center(0, -moveSpeed);
         }
         if (event.key.code == sf::Keyboard::Tab) {
-          // GlobalConfig::s
+          GlobalConfig::switch_color_scheme();
         }
         if (event.key.code == sf::Keyboard::Down) {
           GlobalConfig::move_center(0, moveSpeed);

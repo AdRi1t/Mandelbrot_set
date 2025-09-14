@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#define DEVICE_INLINE_FUNCTION __host__ __device__ __forceinline__
+#define DEVICE_INLINE_FUNCTION __device__ __forceinline__
 
 using Complex = hipDoubleComplex;
 
@@ -52,20 +52,17 @@ template <FractalFunction Fractal_t>
 __global__ void get_number_iterations(const WindowDim<uint32_t> screen,
                                       const WindowDim<double> fract, uint32_t iter_max,
                                       uint32_t *escape_step, Fractal_t func) {
-  const uint32_t col    = threadIdx.x;
-  const uint32_t row    = blockIdx.x;
-  const uint32_t stride = blockDim.x;
+  const uint32_t col    = blockIdx.x * blockDim.x + threadIdx.x;
+  const uint32_t row    = blockIdx.y * blockDim.y + threadIdx.y;
   const uint32_t width  = screen.width();
-  extern __shared__ uint32_t row_data[];
+  const uint32_t height = screen.height();
 
-  for (uint32_t j = col; j < width; j += stride) {
-    Complex c   = make_hipDoubleComplex((double)j, (double)row);
-    c           = scale(screen, fract, c);
-    row_data[j] = escape(c, iter_max, func);
-  }
-  __syncthreads();
-  for (uint32_t j = col; j < width; j += stride) {
-    escape_step[row * width + j] = row_data[j];
+  if (col < width && row < height) {
+    Complex c               = make_hipDoubleComplex((double)col, (double)row);
+    c                       = scale(screen, fract, c);
+    uint32_t num_step       = escape(c, iter_max, func);
+    uint32_t global_idx     = row * width + col;
+    escape_step[global_idx] = num_step;
   }
   return;
 }
@@ -76,19 +73,20 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
     return hipCfma(z, z, c);
   };
 
-  dim3 block_size(128, 1, 1);
-  dim3 grid_size(screen.height(), 1, 1);
+  dim3 block_size(32, 4, 1);
+  int grid_x = (screen.width() + block_size.x - 1) / block_size.x;
+  int grid_y = (screen.height() + block_size.y - 1) / block_size.y;
+  dim3 grid_size(grid_x, grid_y, 1);
   uint32_t *d_escape_step;
-  const size_t alloc_size        = screen.size() * sizeof(uint32_t);
-  const size_t shared_space_size = screen.width() * sizeof(uint32_t);
+  const size_t alloc_size = screen.size() * sizeof(uint32_t);
 
   HIP_CHECK(hipSetDevice(0));
   HIP_CHECK(hipMalloc((void **)&d_escape_step, alloc_size));
   HIP_CHECK(hipMemset(d_escape_step, 0, alloc_size));
 
   hipLaunchKernelGGL(HIP_KERNEL_NAME(get_number_iterations<decltype(func)>), grid_size,
-                     block_size, shared_space_size, hipStreamDefault, screen, fract,
-                     iter_max, d_escape_step, func);
+                     block_size, 0, hipStreamDefault, screen, fract, iter_max,
+                     d_escape_step, func);
 
   HIP_CHECK(hipDeviceSynchronize());
   HIP_CHECK(hipGetLastError());

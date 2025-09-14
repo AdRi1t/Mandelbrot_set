@@ -5,7 +5,7 @@
 namespace GlobalConfig {
 namespace {
 ConfigData _config_data{.iter_max       = 400,
-                        .color_scheme   = 0,
+                        .color_scheme   = 1,
                         .zoom_level     = 1.0,
                         .center_x       = 0.0,
                         .center_y       = 0.0,
@@ -76,9 +76,9 @@ void set_window_resized(bool resized) {
   _config_data.window_resized = resized;
 }
 
-void set_color_scheme(uint32_t id) {
+void switch_color_scheme() {
   std::lock_guard lock(_config_mutex);
-  _config_data.color_scheme = id;
+  _config_data.color_scheme++;
 }
 
 bool is_window_resized() { return _config_data.window_resized; }
@@ -115,6 +115,8 @@ double get_zoom_level() { return _config_data.zoom_level; }
 std::pair<double, double> get_center() {
   return std::make_pair(_config_data.center_x, _config_data.center_y);
 }
+
+uint32_t get_color_scheme() { return _config_data.color_scheme; }
 
 void print_configuration() {
   std::cout << "Current Configuration:\n"
