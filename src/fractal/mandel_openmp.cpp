@@ -1,7 +1,8 @@
-#ifdef USE_SEQUENTIAL
+#ifdef USE_OPENMP
 
 #include "fractal/mandelbrot.hpp"
 
+#include <omp.h>
 #include <complex>
 
 // Use an alias to simplify the use of complex type
@@ -42,15 +43,18 @@ template <FractalFunction Fractal_t>
 void get_number_iterations(const WindowDim<uint32_t> &screen,
                            const WindowDim<double> &fract, uint32_t iter_max,
                            uint32_t *escape_step, Fractal_t func) {
-  int k = 0;
-  // iterate through pixel
-  for (uint32_t i = screen.y_min(); i < screen.y_max(); ++i) {
-    for (uint32_t j = screen.x_min(); j < screen.x_max(); ++j) {
-      Complex c((double)j, (double)i);
-      c              = scale(screen, fract, c);
-      escape_step[k] = escape(c, iter_max, func);
-      k++;
-    }
+  const uint32_t width    = screen.width();
+  const uint32_t height   = screen.height();
+  const uint32_t total_px = width * height;
+
+// iterate through pixel
+#pragma omp parallel for schedule(dynamic)
+  for (uint32_t k = 0; k < total_px; ++k) {
+    uint32_t i = k / width + screen.y_min();
+    uint32_t j = k % width + screen.x_min();
+    Complex c((double)j, (double)i);
+    c              = scale(screen, fract, c);
+    escape_step[k] = escape(c, iter_max, func);
   }
 }
 
@@ -60,7 +64,6 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
   constexpr auto func = [](const Complex z, const Complex c) noexcept -> Complex {
     return z * z + c;
   };
-
   get_number_iterations(screen, fract, iter_max, escape_step, func);
   return;
 }

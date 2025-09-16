@@ -58,10 +58,11 @@ __global__ void get_number_iterations(const WindowDim<uint32_t> screen,
   const uint32_t height = screen.height();
 
   if (col < width && row < height) {
-    Complex c               = make_hipDoubleComplex((double)col, (double)row);
-    c                       = scale(screen, fract, c);
-    uint32_t num_step       = escape(c, iter_max, func);
-    uint32_t global_idx     = row * width + col;
+    Complex c           = make_hipDoubleComplex((double)col, (double)row);
+    c                   = scale(screen, fract, c);
+    uint32_t num_step   = escape(c, iter_max, func);
+    uint32_t global_idx = row * width + col;
+    __syncthreads();
     escape_step[global_idx] = num_step;
   }
   return;
@@ -73,7 +74,7 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
     return hipCfma(z, z, c);
   };
 
-  dim3 block_size(32, 4, 1);
+  dim3 block_size(16, 8, 1);
   int grid_x = (screen.width() + block_size.x - 1) / block_size.x;
   int grid_y = (screen.height() + block_size.y - 1) / block_size.y;
   dim3 grid_size(grid_x, grid_y, 1);

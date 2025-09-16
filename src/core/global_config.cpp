@@ -55,7 +55,7 @@ void parse_from_argv(int argc, char* argv[]) {
 
 void change_iter_max(int delta_iter_max) {
   std::lock_guard lock(_config_mutex);
-  if (_config_data.iter_max + delta_iter_max > 0) {
+  if (_config_data.iter_max + delta_iter_max > 1) {
     _config_data.iter_max += delta_iter_max;
   }
 }
