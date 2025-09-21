@@ -4,9 +4,14 @@
 
 #include "core/window_dim.hpp"
 #include "core/window_utils.hpp"
-#include "core/global_config.hpp"
 #include "fractal/mandelbrot.hpp"
 #include "sfml/sfml_mandelbrot.hpp"
+
+#ifndef USE_HIP
+import core.global_config;
+#else
+#include "core/global_config.hpp"
+#endif
 
 void sfml_handle(WindowDim<unsigned int> window_size, WindowDim<double> fract) {
   sf::ContextSettings settings;

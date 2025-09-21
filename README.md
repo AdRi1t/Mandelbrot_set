@@ -6,7 +6,7 @@ This project is a visualizer for the Mandelbrot set, it lets you explore this fa
 
 ## Prerequisites
 
-- CMake (version 3.23.0 or higher)
+- CMake (version 3.28.3 or higher)
 - C++ compiler compatible with C++20
 - SFML 2 devel (for graphical interface)
 - FreeImage (for image saving)
@@ -19,7 +19,7 @@ This project is a visualizer for the Mandelbrot set, it lets you explore this fa
 On linux like systems, you can install the required dependencies using your *package manager*.
 
 ```bash
-sudo package_manager install build-essential cmake libsfml-dev libfreeimage-dev
+sudo package_manager install build-essential cmake libsfml-dev libfreeimage-dev ninja-build
 ```
 For HIP acceleration (GPU cards):
 
@@ -38,7 +38,7 @@ CMAKE is used to build the project. list of variables that can be set:
 
 ```bash
 mkdir build_mandelbrot
-cmake -S . -B build_mandelbrot -DENABLE_HIP=ON -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build_mandelbrot -G Ninja -DENABLE_HIP=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build_mandelbrot -j 4
 ```
 
@@ -48,7 +48,7 @@ cmake --build build_mandelbrot -j 4
 - **Zoom**: Use `mousewheel` to zoom in and out
 - **Iterations**: Use `a` to increase and `e` to decrease maximum iterations
 - **Style**: Use `Tab` to switch between color schemes
-- **Save**: Press `s` to save an image of the current view (not working !)
+- **Save**: Press `p` to save an image of the current view
 
 > **Note:** Window resizing doesn't work.
 

@@ -6,7 +6,7 @@
 #include "core/window_utils.hpp"
 #include "core/global_config.hpp"
 #include "fractal/mandelbrot.hpp"
-#include "render/save_image.hpp"
+#include "render/color_scheme.hpp"
 
 void updateTextureFromColorArray(sf::Texture &texture, const sf::Color *colorArray) {
   texture.update(reinterpret_cast<const sf::Uint8 *>(colorArray));
@@ -48,7 +48,7 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
   auto [center_x, center_y] = GlobalConfig::get_center();
   WindowUtils::zoom(center_x, center_y, GlobalConfig::get_zoom_level(), fract);
 
-  WindowUtils::adjust_ratio(&screen, fract);
+  WindowUtils::adjust_ratio(screen, fract);
   GlobalConfig::set_fractal_dim(fract->width(), fract->height());
 
   uint32_t *escape_step = new uint32_t[screen.size()];
@@ -76,7 +76,7 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
       makeTexture(screen, fractal_texture);
       fractal_sprite.setTexture(fractal_texture);
 
-      WindowUtils::adjust_ratio(&screen, fract);
+      WindowUtils::adjust_ratio(screen, fract);
       GlobalConfig::set_fractal_dim(fract->width(), fract->height());
       GlobalConfig::set_window_resized(false);
     }

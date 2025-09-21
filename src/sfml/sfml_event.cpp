@@ -5,9 +5,14 @@
 #include <thread>
 
 #include "core/window_utils.hpp"
-#include "core/global_config.hpp"
 #include "fractal/mandelbrot.hpp"
 #include "render/save_image.hpp"
+
+#ifndef USE_HIP
+import core.global_config;
+#else
+#include "core/global_config.hpp"
+#endif
 
 void handle_event(sf::RenderWindow *const window) {
   sf::Event event;
@@ -46,16 +51,18 @@ void handle_event(sf::RenderWindow *const window) {
           GlobalConfig::change_iter_max(-2);
         }
         if (event.key.code == sf::Keyboard::P) {
-          auto [c_x, c_y]   = GlobalConfig::get_center();
-          double zoom_level = GlobalConfig::get_zoom_level();
+          auto [frac_width, frac_height] = GlobalConfig::get_fractal_dim();
+          auto [c_x, c_y]                = GlobalConfig::get_center();
+          double zoom_level              = GlobalConfig::get_zoom_level();
 
           std::string position = pos_to_string(c_x, c_y, zoom_level);
           std::string filename = now_to_string() + position + ".png";
 
-          WindowDim<uint32_t> screen(0, 1920, 0, 1080);
-          WindowDim<double> fract(0, 1920, 0, 1080);
-          WindowUtils::zoom(c_x, c_y, zoom_level, &fract);
+          WindowDim<uint32_t> screen(0, 2560, 0, 1440);
+          WindowDim<double> fract(c_x - frac_width / 2, c_x + frac_width / 2,
+                                  c_y - frac_height / 2, c_y + frac_height / 2);
 
+          WindowUtils::adjust_ratio(screen, &fract);
           uint32_t *escape_step = new uint32_t[screen.size()];
           sf::Color *pixelArray = new sf::Color[screen.size()];
 

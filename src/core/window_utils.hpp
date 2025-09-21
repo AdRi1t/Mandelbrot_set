@@ -17,6 +17,6 @@ void zoom(const double center_x, const double center_y, const double new_zoom_le
 
 void move(const double dx, const double dy, WindowDim<double> *fract);
 
-void adjust_ratio(const WindowDim<uint32_t> *screen, WindowDim<double> *fract);
+void adjust_ratio(const WindowDim<uint32_t> screen, WindowDim<double> *fract);
 
 }  // namespace WindowUtils

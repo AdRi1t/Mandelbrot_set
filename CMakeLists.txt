@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.23)
+# For modules
+cmake_minimum_required(VERSION 3.28.3)
 
 project(mandelbrot LANGUAGES CXX VERSION 1.0)
 
@@ -15,6 +16,7 @@ if(ENABLE_OPENMP AND ENABLE_HIP)
 endif()
 
 if(${ENABLE_HIP})
+  set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
   if(NOT DEFINED ROCM_PATH)
     list(APPEND CMAKE_PREFIX_PATH "/opt/rocm")
   else()
@@ -76,6 +78,7 @@ set(MANDELBROT_SRC
   src/sfml/sfml_render.cpp
   src/sfml/sfml_julia.cpp
   src/render/save_image.cpp
+  src/render/color_scheme.cpp
   src/sfml_main.cpp
 )
 
@@ -91,16 +94,19 @@ add_compile_options(-march=native -Wall -Wextra)
 
 add_executable(mandelbrot ${MANDELBROT_SRC})
 target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} sfml-graphics sfml-window sfml-system)
-
-target_include_directories(mandelbrot PUBLIC
-                          ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
+target_include_directories(mandelbrot PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if(${ENABLE_HIP})
   target_compile_definitions(mandelbrot PUBLIC USE_HIP)
   target_include_directories(mandelbrot PUBLIC ${HIP_INCLUDE_DIRS})
   target_link_libraries(mandelbrot PRIVATE ${HIP_LIBRARIES})
+else()
+  target_sources(mandelbrot
+    PUBLIC FILE_SET CXX_MODULES FILES
+    src/core/global_config.cppm
+  )
 endif()
+
 
 if(${ENABLE_SEQUENTIAL})
   target_compile_definitions(mandelbrot PUBLIC USE_SEQUENTIAL)

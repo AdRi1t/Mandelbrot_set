@@ -46,9 +46,9 @@ void move(const double dx, const double dy, WindowDim<double>* fract) {
   fract->reset(x0 + dx, x1 + dx, y0 + dy, y1 + dy);
 }
 
-void adjust_ratio(const WindowDim<uint32_t>* screen, WindowDim<double>* fract) {
+void adjust_ratio(const WindowDim<uint32_t> screen, WindowDim<double>* fract) {
   double window_ratio =
-      static_cast<double>(screen->width()) / static_cast<double>(screen->height());
+      static_cast<double>(screen.width()) / static_cast<double>(screen.height());
 
   double fract_width  = fract->width();
   double fract_height = fract->height();
