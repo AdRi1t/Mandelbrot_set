@@ -17,7 +17,9 @@ void sfml_handle(WindowDim<unsigned int> window_size, WindowDim<double> fract) {
   sf::ContextSettings settings;
   settings.depthBits         = 24;
   settings.stencilBits       = 8;
-  settings.antialiasingLevel = 4;
+  settings.antialiasingLevel = 0;
+  settings.majorVersion      = 4;
+  settings.minorVersion      = 5;
   sf::RenderWindow window(sf::VideoMode({window_size.width(), window_size.height()}),
                           "Mandelbrot", sf::Style::Default, settings);
 

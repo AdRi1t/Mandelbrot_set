@@ -62,7 +62,6 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
 
   while (renderWindow->isOpen()) {
     GlobalConfig::wait_to_draw();
-    renderWindow->clear(sf::Color::Black);
 
     if (GlobalConfig::is_window_resized()) {
       dim    = renderWindow->getSize();
@@ -73,13 +72,17 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
       escape_step = new uint32_t[screen.size()];
       pixelArray  = new sf::Color[screen.size()];
 
-      makeTexture(screen, fractal_texture);
-      fractal_sprite.setTexture(fractal_texture);
-
       WindowUtils::adjust_ratio(screen, fract);
       GlobalConfig::set_fractal_dim(fract->width(), fract->height());
+
+      makeTexture(screen, fractal_texture);
+      fractal_sprite.setTexture(fractal_texture, true);
+
       GlobalConfig::set_window_resized(false);
     }
+
+    renderWindow->clear(sf::Color::Black);
+
     std::tie(center_x, center_y) = GlobalConfig::get_center();
     auto zoom                    = GlobalConfig::get_zoom_level();
     GlobalConfig::set_fractal_dim(fract->width(), fract->height());

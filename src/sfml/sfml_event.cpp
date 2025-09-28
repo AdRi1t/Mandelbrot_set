@@ -1,7 +1,6 @@
 #include "sfml_mandelbrot.hpp"
 
 #include <cstdint>
-#include <iostream>
 #include <thread>
 
 #include "core/window_utils.hpp"
