@@ -4,7 +4,7 @@
 
 namespace GlobalConfig {
 namespace {
-ConfigData _config_data{.iter_max       = 400,
+ConfigData _config_data{.iter_max       = 200,
                         .color_scheme   = 1,
                         .zoom_level     = 1.0,
                         .center_x       = 0.0,

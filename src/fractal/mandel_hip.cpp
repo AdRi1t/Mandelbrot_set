@@ -4,8 +4,6 @@
 
 #include <hip/hip_runtime.h>
 #include <hip/hip_complex.h>
-#include <hip/hip_gl_interop.h>
-
 #include <iostream>
 
 #define DEVICE_INLINE_FUNCTION __device__ __forceinline__
