@@ -17,9 +17,12 @@ endif()
 
 if(${ENABLE_HIP})
   set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+  find_package(HIP QUIET)
   if(NOT DEFINED ROCM_PATH)
+    message(WARNING "Adding /opt/rocm to CMAKE_PREFIX_PATH")
     list(APPEND CMAKE_PREFIX_PATH "/opt/rocm")
   else()
+    message(STATUS "ROCM_PATH: ${ROCM_PATH}")
     list(APPEND CMAKE_PREFIX_PATH ${ROCM_PATH})
     set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -48,6 +51,9 @@ if(${ENABLE_OPENMP})
     set(${ENABLE_SERIAL} ON)
   endif()
 endif()
+
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
 
 # sanitizers
 if(ENABLE_SANITIZERS)
@@ -79,7 +85,9 @@ set(MANDELBROT_SRC
   src/sfml/sfml_julia.cpp
   src/render/save_image.cpp
   src/render/color_scheme.cpp
+  src/glfw/glfw_utils.cpp
   src/sfml_main.cpp
+  external/glad/glad.cpp
 )
 
 if(${ENABLE_HIP})
@@ -93,8 +101,8 @@ endif()
 add_compile_options(-march=native -Wall -Wextra)
 
 add_executable(mandelbrot ${MANDELBROT_SRC})
-target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} sfml-graphics sfml-window sfml-system)
-target_include_directories(mandelbrot PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} OpenGL::OpenGL glfw sfml-graphics sfml-window sfml-system)
+target_include_directories(mandelbrot PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/external/glad ${CMAKE_CURRENT_SOURCE_DIR}/external/khr)
 
 if(${ENABLE_HIP})
   target_compile_definitions(mandelbrot PUBLIC USE_HIP)
@@ -106,7 +114,6 @@ else()
     src/core/global_config.cppm
   )
 endif()
-
 
 if(${ENABLE_SEQUENTIAL})
   target_compile_definitions(mandelbrot PUBLIC USE_SEQUENTIAL)
