@@ -3,10 +3,6 @@
 #include "fractal/mandelbrot.hpp"
 
 #include <omp.h>
-#include <complex>
-
-// Use an alias to simplify the use of complex type
-using Complex = std::complex<double>;
 
 template <typename F, typename T = Complex>
 concept FractalFunction = std::invocable<F, T, T> && requires(F f, T a, T b) {

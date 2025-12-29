@@ -1,14 +1,6 @@
 #include "glfw_utils.hpp"
+#include "utils.hpp"
 #include <iostream>
-
-#define HIP_CHECK(condition)                                             \
-  {                                                                      \
-    hipError_t err = condition;                                          \
-    if (err != hipSuccess) {                                             \
-      std::cerr << __FILE__ << ":" << __LINE__ << "\t"                   \
-                << "HIP error: " << hipGetErrorString(err) << std::endl; \
-    }                                                                    \
-  }
 
 namespace GLFWUtils {
 
@@ -19,7 +11,7 @@ int initialize() {
 
   // GLFW_PLATFORM_X11;
   // GLFW_PLATFORM_WAYLAND;
-  glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+  // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
   if (glfwInit() != GLFW_TRUE) {
     std::cerr << "failed to initialize GLFW\n";
     std::exit(1);
@@ -31,14 +23,17 @@ int initialize() {
 void finalize() { glfwTerminate(); }
 
 GLFWwindow* create_window(const int initial_width, const int initial_height) {
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
   glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+  glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 
-  GLFWwindow* window = glfwCreateWindow(initial_width, initial_height,
-                                        "OpenGL-HIP interop example", nullptr, nullptr);
+  GLFWwindow* window =
+      glfwCreateWindow(initial_width, initial_height, "Mandelbrot set", nullptr, nullptr);
+  glfwSetWindowMonitor(window, nullptr, 300, 300, initial_width, initial_height,
+                       GLFW_DONT_CARE);
   if (window == nullptr) {
     std::cerr << "Failed to create GLFW window\n";
     std::exit(1);
@@ -75,9 +70,7 @@ void print_configuration() {
   } else {
     std::cout << "Number of HIP devices: " << device_count << std::endl;
   }
-  for (int i = 0; i < device_count; ++i) {
-    print_device_prop(i);
-  }
+  print_device_prop(0);
 }
 
 const char* get_glfw_platform_name() {

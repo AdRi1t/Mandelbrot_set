@@ -1,12 +1,6 @@
 #pragma once
 
-#define INLINE_FUNCTION inline
-
-#ifdef USE_HIP
-#define DEVICE_HOST_INLINE INLINE_FUNCTION __host__ __device__
-#else
-#define DEVICE_HOST_INLINE INLINE_FUNCTION
-#endif
+#include "utils.hpp"
 
 template <typename T>
 struct WindowDim {

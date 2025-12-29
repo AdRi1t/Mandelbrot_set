@@ -1,8 +1,12 @@
+#pragma once
+
 #include "glad.h"
+
 #include <GLFW/glfw3.h>
 
 #include <hip/hip_runtime.h>
-#include <hip/hip_gl_interop.h>
+
+void print_device_prop(int deviceIndex);
 
 namespace GLFWUtils {
 
@@ -13,5 +17,3 @@ const char* get_glfw_platform_name();
 void print_configuration();
 
 }  // namespace GLFWUtils
-
-void print_device_prop(int deviceIndex);

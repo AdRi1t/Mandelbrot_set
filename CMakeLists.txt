@@ -52,7 +52,6 @@ if(${ENABLE_OPENMP})
   endif()
 endif()
 
-find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 # sanitizers
@@ -74,19 +73,15 @@ find_path(FREEIMAGE_INCLUDE_DIR FreeImage.h)
 message(STATUS "Found FreeImage library: ${FREEIMAGE_LIBRARY}")
 message(STATUS "Found FreeImage headers: ${FREEIMAGE_INCLUDE_DIR}")
 
-#SFML 2
-find_package(SFML 2 REQUIRED COMPONENTS graphics window system)
-
 set(MANDELBROT_SRC
   src/core/global_config.cpp
   src/core/window_utils.cpp
-  src/sfml/sfml_event.cpp
-  src/sfml/sfml_render.cpp
-  src/sfml/sfml_julia.cpp
+  src/gl/sfml_event.cpp
+  src/gl/gl_render.cpp
   src/render/save_image.cpp
   src/render/color_scheme.cpp
   src/glfw/glfw_utils.cpp
-  src/sfml_main.cpp
+  src/main.cpp
   external/glad/glad.cpp
 )
 
@@ -101,7 +96,7 @@ endif()
 add_compile_options(-march=native -Wall -Wextra)
 
 add_executable(mandelbrot ${MANDELBROT_SRC})
-target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} OpenGL::OpenGL glfw sfml-graphics sfml-window sfml-system)
+target_link_libraries(mandelbrot PRIVATE ${FREEIMAGE_LIBRARY} glfw)
 target_include_directories(mandelbrot PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/external/glad ${CMAKE_CURRENT_SOURCE_DIR}/external/khr)
 
 if(${ENABLE_HIP})

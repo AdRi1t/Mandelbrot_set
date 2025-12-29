@@ -19,7 +19,7 @@ This project is a visualizer for the Mandelbrot set, it lets you explore this fa
 On linux like systems, you can install the required dependencies using your *package manager*.
 
 ```bash
-sudo package_manager install build-essential cmake libsfml-dev libfreeimage-dev ninja-build
+sudo package_manager install build-essential cmake libsfml-dev libfreeimage-dev ninja-build glfw-devel
 ```
 For HIP acceleration (GPU cards):
 

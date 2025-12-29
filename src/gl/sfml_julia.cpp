@@ -1,5 +1,6 @@
 #include "sfml_mandelbrot.hpp"
 
+/*
 void julia_handle() {
   sf::RenderWindow window(sf::VideoMode(600, 600), "Julia Set - Axes");
 
@@ -43,3 +44,5 @@ void julia_handle() {
     window.display();
   }
 }
+
+*/

@@ -2,6 +2,14 @@
 
 #include <cstdint>
 
+#ifdef USE_HIP
+#include <hip/hip_complex.h>
+using Complex = hipDoubleComplex;
+#else
+#include <complex>
+using Complex = std::complex<double>;
+#endif
+
 #include "core/window_dim.hpp"
 #include "core/window_utils.hpp"
 

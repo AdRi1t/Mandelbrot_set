@@ -1,4 +1,4 @@
-#include "sfml_mandelbrot.hpp"
+#include "gl_mandelbrot.hpp"
 
 #include <cstdint>
 #include <thread>
@@ -13,7 +13,24 @@ import core.global_config;
 #include "core/global_config.hpp"
 #endif
 
-void handle_event(sf::RenderWindow *const window) {
+static void key_callback(GLFWwindow* const window, int key, int, int action, int) {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
+}
+
+static void resize_callback(GLFWwindow* const, const int width, const int height) {
+  glViewport(0, 0, width, height);
+  GlobalConfig::set_window_resized(true);
+}
+
+void handle_event(GLFWwindow* const window) {
+  glfwSetFramebufferSizeCallback(window, resize_callback);
+  glfwSetKeyCallback(window, key_callback);
+}
+
+/*
+  void handle_event(sf::RenderWindow *const window) {
   sf::Event event;
   window->setActive(false);
   while (window->isOpen()) {
@@ -107,3 +124,4 @@ void handle_event(sf::RenderWindow *const window) {
     }
   }
 }
+*/

@@ -1,4 +1,5 @@
-#include "sfml_mandelbrot.hpp"
+#include "gl_mandelbrot.hpp"
+#include "gl/gl_shader.hpp"
 
 #include <iostream>
 #include <thread>
@@ -8,6 +9,108 @@
 #include "fractal/mandelbrot.hpp"
 #include "render/color_scheme.hpp"
 
+void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_TEXTURE_2D);
+  glClearColor(0.f, 0.f, 0.f, 1.f);
+  glClearDepth(1.f);
+  GL_CHECK();
+
+  constexpr float vertices[] = {
+     1.0f,  1.0f, 0.0f,   1.0f, 1.0f,
+     1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
+    -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f,   0.0f, 1.0f
+  };
+
+  constexpr unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
+  };
+
+  // Vertex
+  GLuint VAO, VBO, EBO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+  
+  glBindVertexArray(VAO);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Texture attribute
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  GL_CHECK();
+
+  // Shaders
+  GLuint vertex_shader, fragment_shader;
+  GLUtils::loadShader(vertex_shader, GL_VERTEX_SHADER, GLUtils::VertexShader);
+  GLUtils::loadShader(fragment_shader, GL_FRAGMENT_SHADER, GLUtils::FragmentShader);
+  GL_CHECK();
+
+  GLuint shader_program = glCreateProgram();
+  GLUtils::linkProgram(&shader_program, vertex_shader, fragment_shader);
+  GL_CHECK();
+
+  // Texture 2D
+  GLuint texture_image = 0;
+  int width = 0;
+  int height = 0;
+  glfwGetWindowSize(window, &width, &height);
+  GLubyte* texture_data = new GLubyte[width * height * 3];
+  for (size_t i = 0; i < width * height * 3; ++i){
+    texture_data[i] = 127;
+  }
+
+  glGenTextures(1, &texture_image);
+  glBindTexture(GL_TEXTURE_2D, texture_image);
+
+  // Texture parameters 
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
+               0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
+  GL_CHECK();
+
+
+  while (!glfwWindowShouldClose(window)) {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(shader_program);
+    glBindTexture(GL_TEXTURE_2D, texture_image);
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glfwSwapBuffers(window);
+    glfwWaitEvents();
+    //GlobalConfig::wait_to_draw();
+    // std::cout << "New event !" << std::endl;
+  }
+
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
+  glDeleteProgram(shader_program);
+  glDeleteTextures(1, &texture_image);
+  delete[] texture_data;
+}
+
+
+/*
 void updateTextureFromColorArray(sf::Texture &texture, const sf::Color *colorArray) {
   texture.update(reinterpret_cast<const sf::Uint8 *>(colorArray));
   return;
@@ -111,3 +214,5 @@ void render_handle(sf::RenderWindow *renderWindow, WindowDim<double> *fract) {
   delete[] escape_step;
   delete[] pixelArray;
 }
+
+*/

@@ -1,14 +1,10 @@
 #ifdef USE_HIP
 
 #include "fractal/mandelbrot.hpp"
+#include "utils.hpp"
 
 #include <hip/hip_runtime.h>
-#include <hip/hip_complex.h>
 #include <iostream>
-
-#define DEVICE_INLINE_FUNCTION __device__ __forceinline__
-
-using Complex = hipDoubleComplex;
 
 template <typename F, typename T = Complex>
 concept FractalFunction = requires(F f, T a, T b) {
