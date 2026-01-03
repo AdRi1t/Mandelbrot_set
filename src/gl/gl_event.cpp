@@ -13,10 +13,75 @@ import core.global_config;
 #include "core/global_config.hpp"
 #endif
 
-static void key_callback(GLFWwindow* const window, int key, int, int action, int) {
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
+  if (key == GLFW_KEY_TAB && action == GLFW_RELEASE) {
+    GlobalConfig::switch_color_scheme();
+  }
+  if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+    GlobalConfig::change_iter_max(2);
+  }
+  if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+    GlobalConfig::change_iter_max(-2);
+  }
+  const double moveSpeed = 0.1 / GlobalConfig::get_zoom_level();
+  if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+    GlobalConfig::move_center(-moveSpeed, 0);
+  }
+  if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+    GlobalConfig::move_center(moveSpeed, 0);
+  }
+  if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+    GlobalConfig::move_center(0, moveSpeed);
+  }
+  if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+    GlobalConfig::move_center(0, -moveSpeed);
+  }
+  if (action == GLFW_REPEAT) {
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+      GlobalConfig::change_iter_max(2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+      GlobalConfig::change_iter_max(-2);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+      GlobalConfig::move_center(-moveSpeed, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+      GlobalConfig::move_center(moveSpeed, 0);
+    }
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+      GlobalConfig::move_center(0, moveSpeed);
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+      GlobalConfig::move_center(0, -moveSpeed);
+    }
+  }
+}
+
+static void scroll_callback(GLFWwindow* window, double , double yoffset) {
+  double xpos = 0.0;
+  double ypos = 0.0;
+  int width = 0;
+  int height = 0;
+  glfwGetWindowSize(window, &width, &height);
+  glfwGetCursorPos(window, &xpos, &ypos);
+
+  auto [frac_width, frac_height] = GlobalConfig::get_fractal_dim();
+  double zoomFactor = yoffset > 0 ? 1.2 : 1 / 1.2;
+
+  double ratio_x = frac_width / static_cast<double>(width);
+  double ratio_y = frac_height / static_cast<double>(height);
+
+  double delta_x =
+      0.5 * (xpos - static_cast<float>(width) * 0.5) * ratio_x;
+  double delta_y =
+      -0.5 * (ypos - static_cast<float>(height) * 0.5) * ratio_y;
+
+  GlobalConfig::change_zoom(zoomFactor);
+  GlobalConfig::move_center(delta_x, delta_y);
 }
 
 static void resize_callback(GLFWwindow* const, const int width, const int height) {
@@ -25,8 +90,10 @@ static void resize_callback(GLFWwindow* const, const int width, const int height
 }
 
 void handle_event(GLFWwindow* const window) {
+  glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_FALSE);
   glfwSetFramebufferSizeCallback(window, resize_callback);
   glfwSetKeyCallback(window, key_callback);
+  glfwSetScrollCallback(window, scroll_callback);
 }
 
 /*

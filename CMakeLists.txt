@@ -76,7 +76,7 @@ message(STATUS "Found FreeImage headers: ${FREEIMAGE_INCLUDE_DIR}")
 set(MANDELBROT_SRC
   src/core/global_config.cpp
   src/core/window_utils.cpp
-  src/gl/sfml_event.cpp
+  src/gl/gl_event.cpp
   src/gl/gl_render.cpp
   src/render/save_image.cpp
   src/render/color_scheme.cpp

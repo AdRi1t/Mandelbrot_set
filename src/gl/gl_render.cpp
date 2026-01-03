@@ -67,11 +67,6 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
   GLuint texture_image = 0;
   int width = 0;
   int height = 0;
-  glfwGetWindowSize(window, &width, &height);
-  GLubyte* texture_data = new GLubyte[width * height * 3];
-  for (size_t i = 0; i < width * height * 3; ++i){
-    texture_data[i] = 127;
-  }
 
   glGenTextures(1, &texture_image);
   glBindTexture(GL_TEXTURE_2D, texture_image);
@@ -82,22 +77,83 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
   float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
   glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
 
+  glfwGetWindowSize(window, &width, &height);
+  WindowDim<uint32_t> screen(width, height);
+
+  GLubyte* texture_data = new GLubyte[screen.size() * 3];
+  WindowUtils::adjust_ratio(screen, fract);
+  GlobalConfig::set_fractal_dim(fract->width(), fract->height());
+  uint32_t *escape_step = new uint32_t[screen.size()];
+
+  int iter_max = GlobalConfig::get_iter_max();
+  mandelbrot(screen, *fract, escape_step, iter_max);
+
+  size_t k = 0;
+  // Iterate each pixel
+  for (const auto& _ : screen) {
+    uint32_t n      = escape_step[k];
+    auto [r, g, b]  = ColorSchemes::get_color(n, iter_max);
+    texture_data[3 * k + 0] = r;
+    texture_data[3 * k + 1] = g;
+    texture_data[3 * k + 2] = b;
+    k++;
+  }
+
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
                0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
   GL_CHECK();
 
-
   while (!glfwWindowShouldClose(window)) {
+    auto [center_x, center_y] = GlobalConfig::get_center();
+    iter_max = GlobalConfig::get_iter_max();
+    if (GlobalConfig::is_window_resized()) {
+      glfwGetWindowSize(window, &width, &height);
+      screen.reset(0, width, 0, height);
+
+      delete[] escape_step;
+      delete[] texture_data;
+      escape_step  = new uint32_t[screen.size()];
+      texture_data = new GLubyte[screen.size() * 3];
+
+      WindowUtils::adjust_ratio(screen, fract);
+      GlobalConfig::set_fractal_dim(fract->width(), fract->height());
+
+      GlobalConfig::set_window_resized(false);
+    }
+
+    std::tie(center_x, center_y) = GlobalConfig::get_center();
+    auto zoom                    = GlobalConfig::get_zoom_level();
+    GlobalConfig::set_fractal_dim(fract->width(), fract->height());
+    WindowUtils::zoom(center_x, center_y, zoom, fract);
+
+    mandelbrot(screen, *fract, escape_step, iter_max);
+
+    auto display_start = std::chrono::steady_clock::now();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shader_program);
+    k = 0;
+    // Iterate each pixel
+    for (const auto& _ : screen) {
+      uint32_t n      = escape_step[k];
+      auto [r, g, b]  = ColorSchemes::get_color(n, iter_max);
+      texture_data[3 * k + 0] = r;
+      texture_data[3 * k + 1] = g;
+      texture_data[3 * k + 2] = b;
+      k++;
+    }
+
     glBindTexture(GL_TEXTURE_2D, texture_image);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
+                    GL_RGB, GL_UNSIGNED_BYTE, texture_data);
+
+    glUseProgram(shader_program);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
+    LogInfo::set_display_time_ms(std::chrono::duration<float, std::milli>(
+                                 std::chrono::steady_clock::now() - display_start).count());
     glfwWaitEvents();
-    //GlobalConfig::wait_to_draw();
     // std::cout << "New event !" << std::endl;
   }
 
@@ -107,6 +163,7 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
   glDeleteProgram(shader_program);
   glDeleteTextures(1, &texture_image);
   delete[] texture_data;
+  delete[] escape_step;
 }
 
 
